@@ -1,37 +1,98 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ========== NODE / GENERAL ==========
+/node_modules
+/dist
+/build
 
-# dependencies
-node_modules
-.pnp
-.pnp.js
+.turbo
 
-# testing
-coverage
-
-# next.js
-.next/
-.swc/
-out/
-build
-
-# expo
-.expo
-
-# misc
-.DS_Store
-*.pem
-dist
-
-# debug
+# Logs
+logs
+*.log
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
-# local env files
-.env.local
+# OS
+.DS_Store
+
+# Temp
+.temp
+.tmp
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# ========== TESTS ==========
+/coverage
+/.nyc_output
+
+# ========== IDEs ==========
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ========== ENVIRONMENT VARIABLES ==========
+.env
 .env.development.local
 .env.test.local
 .env.production.local
+.env.local
+.env*.local
 
-# turbo
-.turbo
+# ========== MOBILE / EXPO ==========
+apps/circle/node_modules/
+apps/circle/.expo/
+apps/circle/.expo-shared/
+apps/circle/.vscode
+apps/circle/dist/
+apps/circle/web-build/
+apps/circle/expo-env.d.ts
+apps/circle/android/.gradle/
+apps/circle/android/app/build/
+apps/circle/ios/Pods/
+apps/circle/assets/images/
+
+# API (NestJS - apps/api)
+apps/api/dist/
+apps/api/node_modules/
+apps/api/.env
+apps/api/.env.*
+
+
+# Expo keys / security
+**/*.jks
+**/*.p8
+**/*.p12
+**/*.key
+**/*.mobileprovision
+**/*.pem
+
+# Metro
+**/.metro-health-check*
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# TypeScript
+*.tsbuildinfo

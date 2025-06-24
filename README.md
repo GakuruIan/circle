@@ -1,32 +1,34 @@
-# Turborepo react-native starter
+# Welcome to Circle 👋
 
-This is a community-maintained example. If you experience a problem, please submit a pull request with a fix. GitHub Issues will be closed.
+A modern real-time chat application built using **React Native** and **Expo**, offering a seamless messaging experience with features like contact syncing, media sharing, and cross-platform support.
 
-## Using this example
 
-Run the following command:
+## 🚀 Features
 
-```sh
-npx create-turbo@latest -e with-react-native-web
-```
+- 🔐 **Authentication** — Secure sign-in with phone number (Clerk).
+- 💬 **Real-time Messaging** — Send and receive messages instantly.
+- 🧑‍🤝‍🧑 **Contact Syncing** — Automatically find registered users in your contact list.
+- 📷 **Media Sharing** — Send photos and videos from camera or gallery.
+- 🌓 **Dark/Light Mode** — Respects system theme with full UI support.
+- 🛠️ **Optimized UI** — Smooth animations, gesture support, and responsive layout.
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 📦 Tech Stack
 
-### Apps and Packages
+| Layer           | Technology              |
+|-----------------|--------------------------|
+| Frontend        | React Native (Expo SDK 53) |
+| Auth            | Clerk  
+| Realtime DB     | Supabase
+| Backend         | Nest.js (Figuring it out)
+| State Mgmt      | Zustand  
+| Theming         | NativeWind (Tailwind for RN)
+| Repo management | Turborepo 
 
-- `native`: a [react-native](https://reactnative.dev/) app built with [expo](https://docs.expo.dev/)
-- `web`: a [Next.js](https://nextjs.org/) app built with [react-native-web](https://necolas.github.io/react-native-web/)
-- `@repo/ui`: a stub [react-native](https://reactnative.dev/) component library shared by both `web` and `native` applications
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Project Structure
+/app/circle -> this contains the mobile app for the project
+/app/circle/components->UI components for app
+/app/api -> this contains nest.js api (working on it)
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [Expo](https://docs.expo.dev/) for native development
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [Prettier](https://prettier.io) for code formatting
