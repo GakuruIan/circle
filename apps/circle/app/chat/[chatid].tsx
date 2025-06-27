@@ -6,6 +6,7 @@ import {
   Platform,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -42,6 +43,17 @@ import lightDoodle from "@/assets/images/light_doodle.jpg";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "nativewind";
 
+//components
+import ChatMessageBox from "@/components/ChatComponents/ChatMessageBox";
+import Replybar from "@/components/ChatComponents/Replybar";
+
+import {
+  SwipeableProps,
+  SwipeableMethods,
+} from "react-native-gesture-handler/ReanimatedSwipeable";
+
+type CustomSwipeProps = SwipeableProps & SwipeableMethods;
+
 const Chat = () => {
   const insets = useSafeAreaInsets();
 
@@ -51,27 +63,15 @@ const Chat = () => {
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [message, setMessage] = useState("");
+  const [replyMessage, setReplyMessage] = useState<IMessage | null>(null);
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     if (Platform.OS === "android") {
-  //       AvoidSoftInput.setAdjustResize();
-  //       AvoidSoftInput.setEnabled(true);
-  //     }
-  //     return () => {
-  //       if (Platform.OS === "android") {
-  //         AvoidSoftInput.setEnabled(false);
-  //         AvoidSoftInput.setAdjustPan();
-  //       }
-  //     };
-  //   }, [])
-  // );
+  const SwipeableRowRef = useRef<CustomSwipeProps | null>(null);
 
   useEffect(() => {
     setMessages([
       {
         _id: 1,
-        text: "Hello developer",
+        text: "Hello developer I just want to see how you are doing",
         createdAt: new Date(),
         user: {
           _id: 2,
@@ -82,11 +82,27 @@ const Chat = () => {
     ]);
   }, []);
 
+  useEffect(() => {
+    if (replyMessage && SwipeableRowRef.current) {
+      SwipeableRowRef.current?.close();
+      SwipeableRowRef.current = null;
+    }
+  }, [replyMessage]);
+
   const onSend = useCallback((messages = []) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, messages)
     );
   }, []);
+
+  const updateRowRef = useCallback(
+    (ref: any, message: IMessage) => {
+      if (ref && replyMessage && message._id === replyMessage._id) {
+        SwipeableRowRef.current = ref;
+      }
+    },
+    [replyMessage]
+  );
 
   const styles = StyleSheet.create({
     composer: {
@@ -207,15 +223,29 @@ const Chat = () => {
                   borderRadius: 40,
                 }}
                 renderActions={() => (
-                  <View className="h-12  items-center justify-center ml-2">
+                  <TouchableOpacity className="h-12  items-center justify-center ml-2">
                     <ThemeIcon icon={SmilePlus} />
-                  </View>
+                  </TouchableOpacity>
                 )}
               />
             )}
             user={{
               _id: 1,
             }}
+            renderMessage={(props) => (
+              <ChatMessageBox
+                updateRowRef={updateRowRef}
+                setReplyOnSwipeOpen={setReplyMessage}
+                {...props}
+              />
+            )}
+            renderFooter={() => (
+              <Replybar
+                clearMessage={() => setReplyMessage(null)}
+                isDark={isDark}
+                message={replyMessage}
+              />
+            )}
           />
           {Platform.OS === "android" && (
             <KeyboardAvoidingView behavior="padding" />

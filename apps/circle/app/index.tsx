@@ -30,7 +30,7 @@ const index = () => {
           <View className="absolute items-center bottom-10 gap-y-4">
             <ActivityIndicator size="small" color="#03BD49" />
 
-            <Link href="/(tabs)/chats" className="dark:text-white">
+            <Link href="/chat/1" className="dark:text-white">
               Powered by GakuruCodes
             </Link>
           </View>
