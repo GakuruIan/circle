@@ -73,7 +73,7 @@ const ContactList = () => {
   }, [searchQuery, contacts]);
 
   return (
-    <View className="flex-1 bg-white dark:bg-dark-300">
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* header */}
       <View style={{ paddingTop: topPadding + 15 }}>
         <View className="px-4">
