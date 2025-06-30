@@ -1,0 +1,98 @@
+# ========== NODE / GENERAL ==========
+/node_modules
+/dist
+/build
+
+.turbo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Temp
+.temp
+.tmp
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# ========== TESTS ==========
+/coverage
+/.nyc_output
+
+# ========== IDEs ==========
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ========== ENVIRONMENT VARIABLES ==========
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+.env*.local
+
+# ========== MOBILE / EXPO ==========
+apps/circle/node_modules/
+apps/circle/.expo/
+apps/circle/.expo-shared/
+apps/circle/.vscode
+apps/circle/dist/
+apps/circle/web-build/
+apps/circle/expo-env.d.ts
+apps/circle/android/.gradle/
+apps/circle/android/app/build/
+apps/circle/ios/Pods/
+apps/circle/assets/images/
+
+# API (NestJS - apps/api)
+apps/api/dist/
+apps/api/node_modules/
+apps/api/.env
+apps/api/.env.*
+
+
+# Expo keys / security
+**/*.jks
+**/*.p8
+**/*.p12
+**/*.key
+**/*.mobileprovision
+**/*.pem
+
+# Metro
+**/.metro-health-check*
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# TypeScript
+*.tsbuildinfo
