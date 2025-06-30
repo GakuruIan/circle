@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-
-// router
-import { Link } from "expo-router";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 // image
 
@@ -15,15 +12,23 @@ import { OtpInput } from "react-native-otp-entry";
 //color scheme
 import { useColorScheme } from "nativewind";
 
-// clerk
-// import { useSignUp } from "@clerk/clerk-expo";
+// router
+import { useRouter } from "expo-router";
 
-const Verification = () => {
-  // const { signUp, isLoaded, setActive } = useSignUp();
+// firebase authentication
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
+
+type VerificationProps = {
+  confirm: FirebaseAuthTypes.ConfirmationResult;
+};
+
+const Verification = ({ confirm }: VerificationProps) => {
   const { colorScheme } = useColorScheme();
 
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const styles = StyleSheet.create({
     pinCode: {
@@ -31,27 +36,18 @@ const Verification = () => {
     },
   });
 
-  // const handleVerification = async () => {
-  //   if (!isLoaded) return;
-  //   try {
-  //     setLoading(true);
-  //     const signUpAttempt = await signUp.attemptEmailAddressVerification({
-  //       code,
-  //     });
+  const handleVerification = async () => {
+    try {
+      setLoading(true);
+      await confirm.confirm(code);
 
-  //     if (signUpAttempt.status === "complete") {
-  //       await setActive({ session: signUpAttempt.createdSessionId });
-
-  //       router.replace("/(auth)/setup");
-  //     } else {
-  //       console.error(JSON.stringify(signUpAttempt, null, 2));
-  //     }
-  //   } catch (error) {
-  //     console.error(JSON.stringify(error, null, 2));
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      router.replace("/(auth)/setup");
+    } catch (error) {
+      console.error(JSON.stringify(error, null, 2));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View className="flex-1 bg-white dark:bg-dark-300 px-4">
@@ -78,21 +74,21 @@ const Verification = () => {
             label="Verify code"
             variant="primary"
             className="w-full mb-6"
-            // onPress={handleVerification}
+            onPress={handleVerification}
             loading={loading}
             loadingText="Verifying..."
           />
 
-          <View className="mb-4 items-center justify-center w-full">
-            <Text className="font-quicksand text-gray-500 flex items-center gap-x-2">
+          <View className="mb-4 flex-row gap-x-3 items-center justify-center w-full">
+            <Text className="font-quicksand  text-gray-500 flex items-center gap-x-2">
               Haven&apos;t recieved code yet?{" "}
-              <Link
-                href="/"
-                className="text-gray-400 dark:text-gray-500 text-base font-quicksand "
-              >
-                Resend
-              </Link>
             </Text>
+            <TouchableOpacity activeOpacity={0.7}>
+              <Text className="text-primary text-base font-poppins_regular">
+                {" "}
+                Resend
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>

@@ -8,3 +8,14 @@ expo-env.d.ts
 # local env files
 .env*.local
 .env
+
+# Android build output
+/android/.gradle/
+/android/app/build/
+/android/build/
+
+# Signing keys - NEVER push your keystore
+/android/app/my-release-key.keystore
+
+# Local properties file with SDK path
+/android/local.properties

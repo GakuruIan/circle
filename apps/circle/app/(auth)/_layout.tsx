@@ -19,7 +19,7 @@ const _layout = () => {
           headerTitle: "",
         }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="verification"
         options={{
           headerShown: true,
@@ -27,7 +27,7 @@ const _layout = () => {
           headerLeft: () => <ThemeIcon icon={MoveLeft} size={28} />,
           headerTitle: "",
         }}
-      />
+      /> */}
       <Stack.Screen name="setup" options={{ headerShown: false }} />
     </Stack>
   );

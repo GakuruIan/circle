@@ -1,16 +1,64 @@
-import React from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ActivityIndicator, Text, View, Animated } from "react-native";
 
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // native theme
-import { Link } from "expo-router";
 import { useColorScheme } from "nativewind";
 
-const index = () => {
+// router
+import { useRouter } from "expo-router";
+
+// splashScreen
+import * as SplashScreen from "expo-splash-screen";
+
+// firebase
+import {
+  getAuth,
+  onAuthStateChanged,
+  FirebaseAuthTypes,
+} from "@react-native-firebase/auth";
+
+SplashScreen.preventAutoHideAsync();
+
+const Index = () => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
+
+  const router = useRouter();
+
+  const [fadeAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(
+      getAuth(),
+      (user: FirebaseAuthTypes.User | null) => {
+        // Animate splash fade-in
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }).start();
+
+        // Delay navigation for 2 seconds
+        const timer = setTimeout(async () => {
+          await SplashScreen.hideAsync();
+
+          if (user) {
+            router.replace("/(tabs)/chats");
+          } else {
+            router.replace("/(auth)/signup");
+          }
+        }, 2000);
+
+        // Clear timeout on cleanup
+        return () => clearTimeout(timer);
+      }
+    );
+
+    return unsubscribe;
+  }, [fadeAnim, router]);
 
   return (
     <>
@@ -30,9 +78,11 @@ const index = () => {
           <View className="absolute items-center bottom-10 gap-y-4">
             <ActivityIndicator size="small" color="#03BD49" />
 
-            <Link href="/chat/1" className="dark:text-white">
-              Powered by GakuruCodes
-            </Link>
+            <View>
+              <Text className="dark:text-white font-poppins_regular text-sm -tracking-tight font-medium">
+                Powered by GakuruCodes
+              </Text>
+            </View>
           </View>
         </View>
       </SafeAreaView>
@@ -40,4 +90,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;

@@ -1,7 +1,5 @@
 import { useEffect } from "react";
 
-import * as SplashScreen from "expo-splash-screen";
-
 import {
   DarkTheme,
   DefaultTheme,
@@ -18,12 +16,6 @@ import "@/global.css";
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-// authentication
-import { ClerkProvider } from "@clerk/clerk-expo";
-
-// token cache
-import { tokenCache } from "@/lib/tokenCache";
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded, error] = useFonts({
@@ -34,10 +26,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (error) throw error;
-
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
   }, [loaded, error]);
 
   if (!loaded) {
@@ -49,8 +37,6 @@ export default function RootLayout() {
   }
 
   return (
-    // <ClerkProvider tokenCache={tokenCache}>
-    // </ClerkProvider>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>

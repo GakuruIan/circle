@@ -26,6 +26,9 @@ import Avatar from "@/components/UI/Avatar";
 import HeaderTitle from "@/components/UI/HeaderTitle";
 import ThemeIcon from "@/components/UI/ThemeIcon";
 
+// firebase
+import auth from "@react-native-firebase/auth";
+
 const TabLayout = () => {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -175,7 +178,12 @@ const TabLayout = () => {
           },
           tabBarIcon: ({ focused }) => <Avatar variant="xs" />,
           headerRight: () => (
-            <TouchableOpacity className="mr-3">
+            <TouchableOpacity
+              className="mr-3"
+              onPress={async () => {
+                await auth().signOut();
+              }}
+            >
               <ThemeIcon icon={Settings} />
             </TouchableOpacity>
           ),
