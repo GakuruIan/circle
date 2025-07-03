@@ -1,6 +1,8 @@
 {
-  "compilerOptions": {
+  "compilerOptions": {  
     "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -17,5 +19,5 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-  }
+  },
 }

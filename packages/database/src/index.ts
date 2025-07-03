@@ -1,5 +1,5 @@
-export { prisma } from "./client";
+export { prisma } from "./client.js";
+
+// Export Prisma types and utilities
 export { PrismaClient } from "@prisma/client";
 export * from "@prisma/client";
-
-// Export custom types or utilities goes here:

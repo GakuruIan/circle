@@ -96,3 +96,5 @@ yarn-error.*
 
 # TypeScript
 *.tsbuildinfo
+
+clean.ps1

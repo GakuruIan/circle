@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@circle/prisma": ["packages/database/src/index.ts"],
-      "@circle/prisma/*": ["packages/database/src/*"]    
-    }
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true
   }
 }

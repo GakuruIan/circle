@@ -1,29 +1,38 @@
 {
   "name": "@circle/prisma",
   "version": "1.0.0",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "GakuruIan",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "prisma/**/*"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "clean": "rm -rf dist",
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "@prisma/client": "^6.10.1",
-    "prisma": "^6.10.1"
+    "prisma": "^6.10.1",
+    "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@prisma/extension-accelerate": "^2.0.1",
-    "uuid": "^11.1.0"
-  },
-  "exports": {
-    ".": "./src/index.ts"
-}
+    "@prisma/client": "^6.10.1",
+    "@prisma/extension-accelerate": "^2.0.1"
+  }
 }
