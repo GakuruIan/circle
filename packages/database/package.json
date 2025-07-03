@@ -20,6 +20,10 @@
     "prisma": "^6.10.1"
   },
   "dependencies": {
+    "@prisma/extension-accelerate": "^2.0.1",
     "uuid": "^11.1.0"
-  }
+  },
+  "exports": {
+    ".": "./src/index.ts"
+}
 }

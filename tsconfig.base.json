@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@circle/prisma": ["packages/database/src/index.ts"],
+      "@circle/prisma/*": ["packages/database/src/*"]    
+    }
+  }
+}

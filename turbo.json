@@ -5,7 +5,8 @@
     "build": {
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"]
     },
     "dev": {
       "cache": false,
@@ -21,7 +22,8 @@
       "cache": false
     },
     "db:migrate": {
-      "cache": false
+      "cache": false,
+      "persistent": true
     },
     "lint": {},
     "clean": {
