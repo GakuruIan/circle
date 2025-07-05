@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 
 import { AuthController } from './auth.controller';
-import { AuthServices } from './auth.service';
+import { AuthService } from './auth.service';
 import { PrismaModule } from '../prisma/prisma.module';
-
+import { FirebaseModule } from 'src/firebase/firebase.module';
+import { CloudinaryModule } from 'src/Cloudinary/cloudinary.module';
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, FirebaseModule, CloudinaryModule],
   controllers: [AuthController],
-  providers: [AuthServices],
+  providers: [AuthService],
 })
 export class AuthModule {}

@@ -20,6 +20,7 @@ model User {
   name              String
   about             String
   profileImage      String?
+  imageId           String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   hasCompletedSetup Boolean  @default(false)

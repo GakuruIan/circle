@@ -1,14 +1,29 @@
-import { Body, Controller, Post } from '@nestjs/common';
-
-import { AuthServices } from './auth.service';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  HttpStatus,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { Response } from 'express';
+import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('v1/auth')
+@Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthServices) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  create(@Body() dto: CreateUserDto) {
-    return this.authService.createUser(dto);
+  @UseInterceptors(FileInterceptor('photo'))
+  async create(
+    @Body() dto: CreateUserDto,
+    @Res() res: Response,
+    @UploadedFile() photo?: Express.Multer.File,
+  ) {
+    const user = this.authService.createUser(dto, photo);
+    res.status(HttpStatus.CREATED).send(user);
   }
 }

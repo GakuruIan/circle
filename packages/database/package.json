@@ -23,9 +23,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "clean": "rm -rf dist",
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "clean": "rm -rf dist"
   },
   "devDependencies": {
     "prisma": "^6.10.1",

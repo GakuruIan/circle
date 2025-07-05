@@ -18,6 +18,10 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   profileImage?: string;
+
+  @IsOptional()
+  @IsString()
+  imageId?: string;
 }
 
 export class UpdateUserDto {
