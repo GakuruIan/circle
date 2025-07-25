@@ -1,6 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 
-import { Text, TouchableOpacity, View } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+  Image,
+  Pressable,
+  Alert,
+} from "react-native";
+
+// mutations
+import { useCreateUser } from "@/hooks/mutations/useCreateUser";
 
 // form
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,13 +23,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 // components
 import Input from "@/components/UI/Input";
 import ThemeIcon from "@/components/UI/ThemeIcon";
+import Button from "@/components/UI/Button";
 
 // utils
 import { Colors } from "@/constants/Colors";
+import { PickMediaFromLibrary } from "@/utils/FilePicker";
 
 // icons
-import Button from "@/components/UI/Button";
-import { Plus } from "lucide-react-native";
+import { Plus, Trash } from "lucide-react-native";
+
+// routing
+import { router } from "expo-router";
+
+// user store
+import { useUser } from "@/hooks/stores/userStore";
 
 const profileSchema = z.object({
   username: z
@@ -42,15 +60,63 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 const Setup = () => {
-  const {
-    control,
-    handleSubmit,
+  const { setUser } = useUser();
 
-    formState: { isSubmitting },
-  } = useForm<ProfileFormData>({
+  const [isLoading, setLoading] = useState(false);
+  const [capturedMedia, setCapturedMedia] = useState<string | null>(null);
+
+  const createUserMutation = useCreateUser();
+
+  const { control, handleSubmit } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     mode: "onTouched",
   });
+
+  const onSubmit = async (values: ProfileFormData) => {
+    setLoading(true);
+    try {
+      const { username, about } = values;
+      const formData = new FormData();
+
+      formData.append("name", username);
+      formData.append("about", about);
+
+      const fileName = capturedMedia?.split("/").pop()!;
+      const fileType = fileName.split(".").pop();
+
+      formData.append("photo", {
+        uri: capturedMedia,
+        name: fileName,
+        type: `image/${fileType}`,
+      } as any);
+
+      const user = await createUserMutation.mutateAsync(formData);
+
+      setUser(user);
+
+      router.replace("/(tabs)/chats");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Something went wrong", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFilePick = async () => {
+    try {
+      const uri = await PickMediaFromLibrary(["images"]);
+
+      if (uri) {
+        setCapturedMedia(uri);
+      }
+    } catch (error) {
+      console.log("Error:", error?.message);
+    } finally {
+      // setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-dark-300 px-4">
       <View className="mt-10">
@@ -63,14 +129,31 @@ const Setup = () => {
         </Text>
 
         <View className="mt-6">
-          <View className=" items-center justify-center mt-4 mb-4">
-            <TouchableOpacity className="size-32  rounded-full  border border-dashed items-center justify-center gap-y-4 bg-light-200 dark:bg-dark-200 px-4">
-              <ThemeIcon
-                icon={Plus}
-                darkColor={Colors.dark_gray}
-                lightColor={Colors.light_gray}
-              />
-            </TouchableOpacity>
+          <View className="items-center justify-center mt-4 mb-4">
+            {capturedMedia ? (
+              <View className="relative size-32 gap-y-2 items-center ">
+                <Image
+                  className="h-full w-full rounded-full"
+                  source={{ uri: capturedMedia }}
+                  style={{ flex: 1, aspectRatio: 1 }}
+                  resizeMode="cover"
+                />
+                <Pressable className="bg-rose-600 absolute -bottom-5 p-2 rounded-full items-center justify-center">
+                  <ThemeIcon icon={Trash} darkColor="#fff" lightColor="#fff" />
+                </Pressable>
+              </View>
+            ) : (
+              <TouchableOpacity
+                className="size-32  rounded-full  border border-dashed items-center justify-center gap-y-4 bg-light-200 dark:bg-dark-200 px-4"
+                onPress={handleFilePick}
+              >
+                <ThemeIcon
+                  icon={Plus}
+                  darkColor={Colors.dark_gray}
+                  lightColor={Colors.light_gray}
+                />
+              </TouchableOpacity>
+            )}
           </View>
 
           <View className="mt-4">
@@ -99,8 +182,9 @@ const Setup = () => {
 
           <View className="mt-4">
             <Button
+              onPress={handleSubmit(onSubmit)}
               label="Finish"
-              loading={isSubmitting}
+              loading={isLoading}
               loadingText="Setting up..."
             />
           </View>

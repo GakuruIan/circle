@@ -15,6 +15,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import "@/global.css";
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { ReactQueryClientProvider } from "@/providers/ReactQueryProvider";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -39,56 +40,58 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="(auth)"
-            options={{
-              headerShown: false,
-            }}
-          />
+        <ReactQueryClientProvider>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="(auth)"
+              options={{
+                headerShown: false,
+              }}
+            />
 
-          <Stack.Screen
-            name="user/[userid]"
-            options={{
-              headerShown: false,
-            }}
-          />
+            <Stack.Screen
+              name="user/[userid]"
+              options={{
+                headerShown: false,
+              }}
+            />
 
-          <Stack.Screen
-            name="contacts"
-            options={{
-              headerShown: false,
-            }}
-          />
+            <Stack.Screen
+              name="contacts"
+              options={{
+                headerShown: false,
+              }}
+            />
 
-          <Stack.Screen
-            name="group/[groupid]"
-            options={{
-              headerShown: false,
-            }}
-          />
+            <Stack.Screen
+              name="group/[groupid]"
+              options={{
+                headerShown: false,
+              }}
+            />
 
-          <Stack.Screen
-            name="chat/[chatid]"
-            options={{
-              headerShown: false,
-            }}
-          />
+            <Stack.Screen
+              name="chat/[chatid]"
+              options={{
+                headerShown: false,
+              }}
+            />
 
-          <Stack.Screen
-            name="(status)"
-            options={{
-              headerShown: false,
-            }}
-          />
-        </Stack>
+            <Stack.Screen
+              name="(status)"
+              options={{
+                headerShown: false,
+              }}
+            />
+          </Stack>
+        </ReactQueryClientProvider>
         <StatusBar style="auto" />
       </ThemeProvider>
     </GestureHandlerRootView>

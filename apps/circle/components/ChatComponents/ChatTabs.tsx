@@ -71,14 +71,15 @@ const ChatTabs = () => {
               minWidth: 80,
             }}
             renderTabBarItem={(props) => {
-              const { route } = props;
+              const { key, route, navigationState, style, ...rest } = props;
               const focused =
                 props.navigationState.index ===
                 props.navigationState.routes.indexOf(route);
               const borderColor = "#25D366";
               return (
                 <TouchableOpacity
-                  {...props}
+                  key={key}
+                  {...rest}
                   style={[
                     props.style,
                     {

@@ -50,7 +50,7 @@ const Input: React.FC<inputprops> = ({
               placeholderTextColor={
                 isDark ? Colors.dark_gray : Colors.light_gray
               }
-              style={{ color: isDark ? Colors.dark_gray : Colors.light_gray }}
+              // style={{ color: isDark ? Colors.dark_gray : Colors.light_gray }}
               autoCapitalize="none"
               placeholder={placeholder}
               secureTextEntry={isPasswordVisible}

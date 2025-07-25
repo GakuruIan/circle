@@ -1,11 +1,11 @@
 import { IsString, IsOptional, MaxLength } from 'class-validator';
 
 export class CreateUserDto {
-  @IsString()
-  firebaseId: string;
+  // @IsString()
+  // firebaseId: string;
 
-  @IsString()
-  phoneNumber: string;
+  // @IsString()
+  // phoneNumber: string;
 
   @IsString()
   @MaxLength(100)
@@ -15,13 +15,13 @@ export class CreateUserDto {
   @MaxLength(100)
   about: string;
 
-  @IsOptional()
-  @IsString()
-  profileImage?: string;
+  // @IsOptional()
+  // @IsString()
+  // profileImage?: string;
 
-  @IsOptional()
-  @IsString()
-  imageId?: string;
+  // @IsOptional()
+  // @IsString()
+  // imageId?: string;
 }
 
 export class UpdateUserDto {

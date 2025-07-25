@@ -43,6 +43,7 @@ const Verification = ({ confirm }: VerificationProps) => {
 
       router.replace("/(auth)/setup");
     } catch (error) {
+      console.log(error);
       console.error(JSON.stringify(error, null, 2));
     } finally {
       setLoading(false);

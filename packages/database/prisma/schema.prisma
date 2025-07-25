@@ -21,6 +21,7 @@ model User {
   about             String
   profileImage      String?
   imageId           String?
+  deleted           Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   hasCompletedSetup Boolean  @default(false)

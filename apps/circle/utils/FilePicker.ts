@@ -1,10 +1,15 @@
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
+import * as FileSystem from "expo-file-system";
 
 type AllowedTypes = "livePhotos" | "images" | "videos";
 
 export async function PickMediaFromLibrary(
-  mediaTypes: AllowedTypes[]
+  mediaTypes: AllowedTypes[],
+  options: { maxSizeMB: number; maxSizeBytes: number } = {
+    maxSizeMB: 10,
+    maxSizeBytes: 10 * 1024 * 1024,
+  }
 ): Promise<string> {
   const { status } = await MediaLibrary.requestPermissionsAsync();
   if (status !== "granted") {
@@ -34,5 +39,15 @@ export async function PickMediaFromLibrary(
     throw new Error("No media selected.");
   }
 
-  return result.assets[0].uri;
+  const uri = result.assets[0].uri;
+
+  const fileInfo = await FileSystem.getInfoAsync(uri);
+
+  if (fileInfo.exists) {
+    if (fileInfo.size && fileInfo.size > options.maxSizeBytes) {
+      throw new Error(`File size exceeds ${options.maxSizeMB}MB`);
+    }
+  }
+
+  return uri;
 }

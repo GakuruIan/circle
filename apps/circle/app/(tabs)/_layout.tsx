@@ -1,7 +1,7 @@
 import React from "react";
 import { Platform, Pressable, TouchableOpacity, View } from "react-native";
 
-import { Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -182,6 +182,7 @@ const TabLayout = () => {
               className="mr-3"
               onPress={async () => {
                 await auth().signOut();
+                router.replace("/(auth)/signup");
               }}
             >
               <ThemeIcon icon={Settings} />

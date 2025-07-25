@@ -82,6 +82,7 @@ const Signup = () => {
         getAuth(),
         fullPhoneNumber
       );
+
       setConfirm(confirmation);
     } catch (error) {
       console.error(error);

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
@@ -12,18 +13,24 @@ export class CloudinaryService {
     });
   }
 
-  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+  async uploadImage(
+    file: Express.Multer.File,
+    options?: { folder: string; media_type: 'image' | 'raw' },
+  ): Promise<UploadApiResponse> {
     try {
       return new Promise((resolve, reject) => {
         cloudinary.uploader
           .upload_stream(
             {
-              folder: 'circle/user_profiles',
-              resource_type: 'image',
-              transformation: [
-                { width: 500, height: 500, crop: 'fill' },
-                { quality: 'auto' },
-              ],
+              folder: `circle/${options.folder}`,
+              resource_type: options.media_type ?? 'image',
+              transformation:
+                options.media_type === 'image'
+                  ? [
+                      { width: 500, height: 500, crop: 'fill' },
+                      { quality: 'auto' },
+                    ]
+                  : undefined,
             },
             (error, result) => {
               if (error) {
@@ -47,6 +54,7 @@ export class CloudinaryService {
       await cloudinary.uploader.destroy(publicId);
     } catch (error) {
       console.error('Error deleting image from Cloudinary:', error);
+      throw new BadRequestException('Failed to delete image in Cloudinary');
     }
   }
 }

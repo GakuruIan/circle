@@ -76,6 +76,7 @@ apps/api/dist/
 apps/api/node_modules/
 apps/api/.env
 apps/api/.env.*
+apps/api/firebase-service-account.json
 
 
 # Expo keys / security

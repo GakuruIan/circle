@@ -60,15 +60,6 @@
         }
       ],
       "expo-video",
-      "expo-secure-store",
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "useFrameworks": "static"
-          }
-        }
-      ],
       "@react-native-firebase/app", "@react-native-firebase/auth"
     ],
     "experiments": {

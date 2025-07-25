@@ -1,5 +1,14 @@
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import React, { useState, useCallback } from "react";
+import { Text, TouchableOpacity, View, Alert } from "react-native";
+
+// routing
+import { useFocusEffect } from "@react-navigation/native";
+
+// firebase auth
+import auth from "@react-native-firebase/auth";
+
+//utils
+import { PickMediaFromLibrary } from "@/utils/FilePicker";
 
 // form
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +23,13 @@ import ThemeIcon from "@/components/UI/ThemeIcon";
 
 // icons
 import { Pencil } from "lucide-react-native";
+
+// hooks
+import { useUpdateUser } from "@/hooks/mutations/useUpdateUser";
+
+// stores
+import { useUser } from "@/hooks/stores/userStore";
+import { router } from "expo-router";
 
 const profileSchema = z.object({
   username: z
@@ -37,6 +53,21 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 const Profile = () => {
+  const { updateUser, user } = useUser();
+  const updateUserMutation = useUpdateUser();
+  const [isLoading, setLoading] = useState(false);
+  const [capturedMedia, setCapturedMedia] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const currentUser = auth().currentUser;
+
+      if (!currentUser) {
+        router.replace("/(auth)/signup");
+      }
+    }, [])
+  );
+
   const {
     control,
     handleSubmit,
@@ -47,17 +78,65 @@ const Profile = () => {
     mode: "onTouched",
   });
 
+  const handleFilePick = async () => {
+    try {
+      const uri = await PickMediaFromLibrary(["images"]);
+
+      if (uri) {
+        setCapturedMedia(uri);
+      }
+    } catch (error) {
+      console.log("Error:", error?.message);
+    } finally {
+      // setLoading(false);
+    }
+  };
+
   const onSubmit = async (values: ProfileFormData) => {
-    console.log(values);
+    setLoading(true);
+
+    try {
+      const { username, about } = values;
+      const formData = new FormData();
+
+      formData.append("name", username);
+      formData.append("about", about);
+
+      if (capturedMedia) {
+        const fileName = capturedMedia?.split("/").pop()!;
+        const fileType = fileName.split(".").pop();
+
+        formData.append("photo", {
+          uri: capturedMedia,
+          name: fileName,
+          type: `image/${fileType}`,
+        } as any);
+      }
+
+      const user = await updateUserMutation.mutateAsync(formData);
+
+      updateUser(user);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Something went wrong", error.message);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <View className="flex-1 bg-white dark:bg-dark-300 px-2.5">
       <View className="mt-4 items-center justify-between relative w-full mb-6">
+        {/* 
+        {
+          capturedMedia ? <Avatar variant="xl"/> :<Avatar variant="xl"/>
+        } */}
+
         <Avatar variant="xl" />
 
         <TouchableOpacity
           className="absolute -bottom-5 bg-primary p-2.5 rounded-full"
           activeOpacity={0.7}
+          onPress={handleFilePick}
         >
           <ThemeIcon icon={Pencil} darkColor="#fff" lightColor="#fff" />
         </TouchableOpacity>
@@ -70,6 +149,7 @@ const Profile = () => {
         <Input
           name="username"
           placeholder="e.g GakuruCodes"
+          defaultValue={user?.name}
           control={control}
           className="w-full"
         />
@@ -82,6 +162,7 @@ const Profile = () => {
         <Input
           name="about"
           placeholder="e.g Busy now"
+          defaultValue={user?.about}
           control={control}
           className="w-full"
         />
