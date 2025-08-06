@@ -44,12 +44,4 @@ export const useUserStore = create<UserStore>()(
   )
 );
 
-// export const useUser = () =>
-//   useUserStore((state) => ({
-//     user: state.user,
-//     setUser: state.setUser,
-//     updateUser: state.updateUser,
-//     clearUser: state.clearUser,
-//   }));
-
 export const useUser = useUserStore;

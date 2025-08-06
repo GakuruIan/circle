@@ -6,14 +6,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-import { FirebaseService } from '../firebase/firebase.service';
+import { FirebaseService } from '@/firebase/firebase.service';
 
 @Injectable()
 export class FirebaseGuardAuth implements CanActivate {
   constructor(private readonly firebase: FirebaseService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    console.log(`[Auth Guard] ${request.method} ${request.url}`);
+
     const authHeader =
       request.headers.authorization || request.headers.Authorization;
 

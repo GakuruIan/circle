@@ -82,7 +82,10 @@ const TabLayout = () => {
           headerTitle: () => <HeaderTitle title="Messages" />,
           headerRight: () => (
             <View className="flex-row items-center gap-x-2 mr-2">
-              <TouchableOpacity className="mx-2">
+              <TouchableOpacity
+                className="mx-2"
+                onPress={() => router.push("/contacts")}
+              >
                 <ThemeIcon icon={SquarePen} size={22} />
               </TouchableOpacity>
 

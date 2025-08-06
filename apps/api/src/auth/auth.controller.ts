@@ -15,7 +15,7 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FirebaseGuardAuth } from './firebase-auth.guard';
+import { FirebaseGuardAuth } from '../firebase/firebase-auth.guard';
 import * as admin from 'firebase-admin';
 
 @Controller('auth')

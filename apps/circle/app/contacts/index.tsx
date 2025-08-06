@@ -1,4 +1,10 @@
 import React, { useEffect, useState } from "react";
+
+import { Contacts, User } from "@circle/prisma";
+
+type ContactList = Pick<Contacts, "displayName" | "phonenumber" | "userId"> &
+  Pick<User, "about" | "profileImage" | "name">;
+
 import {
   ActivityIndicator,
   Dimensions,
@@ -22,7 +28,9 @@ import { MoreVertical, MoveLeft } from "lucide-react-native";
 // expo router
 import { useRouter } from "expo-router";
 
-import * as Contacts from "expo-contacts";
+import * as ExpoContacts from "expo-contacts";
+
+import { useSyncContacts } from "@/hooks/mutations/useSyncContacts";
 
 const ContactList = () => {
   const topPadding = useSafeAreaInsets().top;
@@ -32,30 +40,59 @@ const ContactList = () => {
 
   const router = useRouter();
 
-  const [contacts, setContacts] = useState<Contacts.Contact[]>([]);
-  const [filteredContacts, setFilteredContacts] = useState<Contacts.Contact[]>(
-    []
-  );
+  const useSyncMutation = useSyncContacts();
+
+  const [contacts, setContacts] = useState<ContactList[]>([]);
+  const [filteredContacts, setFilteredContacts] = useState<ContactList[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const { status } = await Contacts.requestPermissionsAsync();
+      const { status } = await ExpoContacts.requestPermissionsAsync();
 
       if (status === "granted") {
-        const { data } = await Contacts.getContactsAsync({
-          fields: [Contacts.Fields.FirstName, Contacts.Fields.PhoneNumbers],
+        const { data } = await ExpoContacts.getContactsAsync({
+          fields: [
+            ExpoContacts.Fields.FirstName,
+            ExpoContacts.Fields.PhoneNumbers,
+          ],
         });
 
         const validContacts = data
           .filter((c) => c.name && c.phoneNumbers?.length)
+          .map((c) => {
+            const primary = c.phoneNumbers?.find((p) => p.isPrimary);
+
+            // If none marked as primary, fallback to first available
+            const chosenNumber =
+              primary?.number ||
+              (c.phoneNumbers && c.phoneNumbers[0]?.number) ||
+              "";
+
+            return {
+              displayName: c.name,
+              phonenumber: chosenNumber,
+            };
+          })
+          .filter((c) => c.phonenumber)
           .sort((a, b) =>
-            a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+            a.displayName.localeCompare(b.displayName, undefined, {
+              sensitivity: "base",
+            })
           );
 
-        setContacts(validContacts);
-        setFilteredContacts(validContacts);
+        const formData = new FormData();
+
+        formData.append("contacts", validContacts);
+        try {
+          const userContacts = await useSyncMutation.mutateAsync(formData);
+
+          setContacts(userContacts);
+          setFilteredContacts(userContacts);
+        } catch (error) {
+          console.error("Failed to sync contacts", error);
+        }
       }
       setLoading(false);
     })();
@@ -64,16 +101,14 @@ const ContactList = () => {
   useEffect(() => {
     const filtered = contacts.filter((c) => {
       const query = searchQuery.toLowerCase();
-      return (
-        c.name.toLowerCase().includes(query) ||
-        c.phoneNumbers?.some((p) => p?.number.includes(query))
-      );
+      return c.displayName.toLowerCase().includes(query);
+      // c.phoneNumbers?.some((p) => p?.number.includes(query))
     });
     setFilteredContacts(filtered);
   }, [searchQuery, contacts]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View className="flex-1 bg-white dark:bg-dark-300 ">
       {/* header */}
       <View style={{ paddingTop: topPadding + 15 }}>
         <View className="px-4">
@@ -115,16 +150,16 @@ const ContactList = () => {
           contentContainerStyle={{
             paddingBottom: bottomPadding,
           }}
-          keyExtractor={(item) => item.id!}
+          keyExtractor={(item) => item.userId!}
           renderItem={({ item }) => (
-            <View className="py-3 px-1 flex-row w-full items-center">
+            <View className="py-3 px-4 flex-row w-full items-center">
               <Avatar variant="md" />
               <View className="flex-1 ml-2">
                 <Text className="font-poppins_regular dark:text-white text-base mb-0.5">
-                  {item?.name}
+                  {item?.displayName}
                 </Text>
                 <Text className="text-sm text-gray-400 dark:text-gray-500">
-                  About
+                  {item.about}
                 </Text>
               </View>
             </View>

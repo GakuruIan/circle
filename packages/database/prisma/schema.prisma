@@ -13,6 +13,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum MediaType {
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  STICKER
+}
+
+enum DeliveryStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum ConversationMemberRole {
+  ADMIN
+  MEMBER
+}
+
 model User {
   id                String   @id @unique @default(uuid())
   firebaseId        String   @unique
@@ -25,6 +44,128 @@ model User {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   hasCompletedSetup Boolean  @default(false)
+  isOnline          Boolean  @default(false)
+  lastSeen          DateTime @default(now())
+
+  contacts  Contacts[] @relation("UserContacts")
+  contactOf Contacts[] @relation("ContactUser")
+
+  chats    ChatParticipants[]
+  messages Message[]          @relation("SenderMessages")
+
+  blockedUsers   BlockedUser[] @relation("BlockingUser")
+  blockedByUsers BlockedUser[] @relation("BlockedUser")
+
+  DeletedMessage DeletedMessage[]
 
   @@index([phoneNumber])
+}
+
+model Contacts {
+  id            String @id @unique @default(uuid())
+  userId        String
+  contactUserId String
+  displayName   String
+  phonenumber   String
+
+  user User @relation("UserContacts", fields: [userId], references: [firebaseId], onDelete: Cascade)
+
+  contactUser User @relation("ContactUser", fields: [contactUserId], references: [firebaseId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, contactUserId])
+  @@map("contacts")
+}
+
+model Chat {
+  id           String             @id @unique @default(uuid())
+  isGroup      Boolean            @default(false)
+  name         String? // name for groups
+  avatarUrl    String? // for groups
+  participants ChatParticipants[]
+  messages     Message[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model ChatParticipants {
+  id     String                 @id @unique @default(uuid())
+  user   User                   @relation(fields: [userId], references: [id])
+  userId String
+  chat   Chat                   @relation(fields: [chatId], references: [id])
+  chatId String
+  role   ConversationMemberRole @default(MEMBER)
+  leftAt DateTime?
+
+  joinedAt DateTime @default(now())
+
+  @@unique([userId, chatId])
+}
+
+model BlockedUser {
+  id             String @id @unique @default(uuid())
+  blockingUserId String
+  blockedUserId  String
+
+  blockedAt DateTime @default(now())
+
+  blockingUser User @relation("BlockingUser", fields: [blockingUserId], references: [id])
+  blockedUser  User @relation("BlockedUser", fields: [blockedUserId], references: [id])
+
+  @@unique([blockingUserId, blockedUserId])
+  @@map("blocked_users")
+}
+
+model Message {
+  id        String     @id @unique @default(uuid())
+  chat      Chat       @relation(fields: [chatId], references: [id])
+  chatId    String
+  sender    User       @relation("SenderMessages", fields: [senderId], references: [id])
+  senderId  String
+  text      String
+  mediaType MediaType?
+  mediaUrl  String?
+
+  repliedTo   Message?  @relation("MessageReplies", fields: [repliedToId], references: [id])
+  repliedToId String?
+  replies     Message[] @relation("MessageReplies")
+
+  sentAt DateTime @default(now())
+
+  deliveredTo DeliveredStatus[]
+
+  deletedFor DeletedMessage[]
+
+  edited    Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+}
+
+model DeliveredStatus {
+  id        String         @id @default(uuid())
+  message   Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String
+  userId    String
+  status    DeliveryStatus @default(SENT)
+
+  deliveredAt DateTime?
+  readAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([messageId, userId])
+  @@map("message_delivery")
+}
+
+model DeletedMessage {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  message   Message  @relation(fields: [messageId], references: [id])
+  messageId String
+  deletedAt DateTime @default(now())
+
+  @@unique([userId, messageId])
 }
