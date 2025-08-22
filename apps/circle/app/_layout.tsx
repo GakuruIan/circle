@@ -78,7 +78,7 @@ export default function RootLayout() {
             />
 
             <Stack.Screen
-              name="chat/[chatid]"
+              name="chat"
               options={{
                 headerShown: false,
               }}

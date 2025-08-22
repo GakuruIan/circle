@@ -52,7 +52,7 @@ const ChatTabs = () => {
             indicatorStyle={{ height: 0, display: "none" }}
             contentContainerStyle={{
               paddingLeft: 8,
-              paddingRight: 30, // ✅ enough space to scroll last item
+              paddingRight: 30,
             }}
             style={{
               borderBottomWidth: 0,

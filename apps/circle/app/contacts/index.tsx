@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Contacts, User } from "@circle/prisma";
 
 type ContactList = Pick<Contacts, "displayName" | "phonenumber" | "userId"> &
-  Pick<User, "about" | "profileImage" | "name">;
+  Pick<User, "about" | "profileImage" | "name" | "id">;
 
 import {
   ActivityIndicator,
@@ -26,7 +26,7 @@ import ThemeIcon from "@/components/UI/ThemeIcon";
 import { MoreVertical, MoveLeft } from "lucide-react-native";
 
 // expo router
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 import * as ExpoContacts from "expo-contacts";
 
@@ -150,19 +150,24 @@ const ContactList = () => {
           contentContainerStyle={{
             paddingBottom: bottomPadding,
           }}
-          keyExtractor={(item) => item.userId!}
+          keyExtractor={(item) => item.id!}
           renderItem={({ item }) => (
-            <View className="py-3 px-4 flex-row w-full items-center">
-              <Avatar variant="md" />
-              <View className="flex-1 ml-2">
-                <Text className="font-poppins_regular dark:text-white text-base mb-0.5">
-                  {item?.displayName}
-                </Text>
-                <Text className="text-sm text-gray-400 dark:text-gray-500">
-                  {item.about}
-                </Text>
+            <Link
+              className="flex items-center gap-x-1 flex-1"
+              href={`/chat/new?recipient=${item.id}`}
+            >
+              <View className="py-3 px-4 flex-row w-full  items-center">
+                <Avatar variant="md" />
+                <View className="flex-1 ml-2">
+                  <Text className="font-poppins_regular dark:text-white text-base mb-0.5">
+                    {item?.displayName}
+                  </Text>
+                  <Text className="text-sm text-gray-400 dark:text-gray-500">
+                    {item.about}
+                  </Text>
+                </View>
               </View>
-            </View>
+            </Link>
           )}
           ListEmptyComponent={
             <View

@@ -81,6 +81,7 @@ export class ContactsService {
             profileImage: true,
             firebaseId: true,
             about: true,
+            id: true,
           },
         },
       },
@@ -92,10 +93,9 @@ export class ContactsService {
       about: contact.contactUser.about,
       profileImage: contact.contactUser.profileImage,
       phonenumber: contact.contactUser.phoneNumber,
-      userId: contact.contactUser.firebaseId,
+      userUid: contact.contactUser.firebaseId,
+      id: contact.contactUser.id,
     }));
-
-    console.log(UserContacts);
 
     return UserContacts;
   }
@@ -127,6 +127,7 @@ export class ContactsService {
             profileImage: true,
             firebaseId: true,
             about: true,
+            id: true,
           },
         },
       },
@@ -139,6 +140,7 @@ export class ContactsService {
       profileImage: contact.contactUser.profileImage,
       phoneNumber: contact.contactUser.phoneNumber,
       userUid: contact.contactUser.firebaseId,
+      id: contact.contactUser.id,
     }));
 
     return UserContacts;

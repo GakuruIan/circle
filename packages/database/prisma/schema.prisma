@@ -80,14 +80,33 @@ model Contacts {
 }
 
 model Chat {
-  id           String             @id @unique @default(uuid())
-  isGroup      Boolean            @default(false)
-  name         String? // name for groups
-  avatarUrl    String? // for groups
+  id String @id @unique @default(uuid())
+
   participants ChatParticipants[]
   messages     Message[]
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+
+  // for groups
+  onlyAdminsCanMessage Boolean @default(false)
+  name                 String?
+  avatarUrl            String?
+  imageId              String?
+  isGroup              Boolean @default(false)
+
+  // for direct messages
+  participant1Id String?
+  participant2Id String?
+
+  lastMessageId String?
+  lastMessage   Message?  @relation("ChatLastMessage", fields: [lastMessageId], references: [id])
+  lastMessageAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isGroup])
+  @@index([participant1Id, participant2Id])
+  @@index([lastMessageAt(sort: Desc)])
+  @@index([createdAt])
 }
 
 model ChatParticipants {
@@ -127,10 +146,13 @@ model Message {
   text      String
   mediaType MediaType?
   mediaUrl  String?
+  mediaId   String?
 
   repliedTo   Message?  @relation("MessageReplies", fields: [repliedToId], references: [id])
   repliedToId String?
   replies     Message[] @relation("MessageReplies")
+
+  chatsAsLastMessage Chat[] @relation("ChatLastMessage")
 
   sentAt DateTime @default(now())
 
@@ -140,6 +162,10 @@ model Message {
 
   edited    Boolean  @default(false)
   updatedAt DateTime @updatedAt
+
+  @@index([chatId, sentAt(sort: Desc)])
+  @@index([senderId])
+  @@index([sentAt(sort: Desc)])
 }
 
 model DeliveredStatus {

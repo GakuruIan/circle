@@ -17,7 +17,7 @@ type props = {
 
 const ChatList = ({ chats }: props) => {
   const { height } = Dimensions.get("screen");
-  const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <View className="flex-1  pt-2">
       <FlatList
@@ -43,13 +43,17 @@ const ChatList = ({ chats }: props) => {
           <View
             style={{
               flex: 1,
+
               alignItems: "center",
               justifyContent: "center",
               height: height * 0.65,
             }}
           >
-            <Text className="text-gray-500 dark:text-gray-400 font-poppins_regular text-xl tracking-tight">
-              No chats found.
+            <Text className="text-gray-700 dark:text-gray-400 font-poppins_semibold font-medium text-xl tracking-wide mb-1">
+              No chats yet 👋.
+            </Text>
+            <Text className="text-gray-500  dark:text-gray-400 font-poppins_regular text-base tracking-wide">
+              Say hi to someone and break the silence!
             </Text>
           </View>
         )}

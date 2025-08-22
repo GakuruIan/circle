@@ -16,10 +16,6 @@ export class FirebaseService implements OnModuleInit {
   }
 
   async verifyIdToken(idToken: string) {
-    console.log('🔍 Verifying token...');
-    console.log('🔍 Token type:', typeof idToken);
-    console.log('🔍 Token length:', idToken?.length);
-
     if (!idToken) {
       throw new Error('No ID token provided');
     }
@@ -53,6 +49,5 @@ export class FirebaseService implements OnModuleInit {
       console.log('❌ Error code:', error.code);
       throw error;
     }
-    return admin.auth().verifyIdToken(idToken);
   }
 }

@@ -15,13 +15,13 @@ export class CreateUserDto {
   @MaxLength(100)
   about: string;
 
-  // @IsOptional()
-  // @IsString()
-  // profileImage?: string;
+  @IsOptional()
+  @IsString()
+  profileImage?: string;
 
-  // @IsOptional()
-  // @IsString()
-  // imageId?: string;
+  @IsOptional()
+  @IsString()
+  imageId?: string;
 }
 
 export class UpdateUserDto {
