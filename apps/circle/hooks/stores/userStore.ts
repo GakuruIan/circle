@@ -7,6 +7,7 @@ const mmkv = new MMKV();
 
 type FrontendUser = Pick<
   User,
+  | "id"
   | "firebaseId"
   | "name"
   | "phoneNumber"

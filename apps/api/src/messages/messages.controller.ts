@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
   Req,
@@ -17,7 +18,7 @@ import { FirebaseGuardAuth } from '@/firebase/firebase-auth.guard';
 import { MessageService } from './messages.service';
 
 // dto
-import { CreateMessageDTO } from './dto/message.dto';
+import { CreateMessageDTO, GetMessageDTO } from './dto/message.dto';
 
 @Controller('messages')
 @UseGuards(FirebaseGuardAuth)
@@ -33,6 +34,24 @@ export class MessagesController {
     try {
       const message = await this.messageService.sendMessage(dto, req as any);
       return res.status(HttpStatus.OK).send(message);
+    } catch (error) {
+      return res.status(500).send(error);
+    }
+  }
+
+  @Get()
+  async FetchMessages(
+    @Body() dto: GetMessageDTO,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const messages = await this.messageService.GetChatMessages(
+        dto,
+        req as any,
+      );
+
+      res.status(HttpStatus.OK).send(messages);
     } catch (error) {
       return res.status(500).send(error);
     }

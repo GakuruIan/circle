@@ -65,6 +65,7 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "rn-emoji-keyboard": "^1.7.0",
+    "socket.io-client": "^4.8.1",
     "zod": "^3.25.64",
     "zustand": "^5.0.5"
   },

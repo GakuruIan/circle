@@ -1,20 +1,16 @@
 import { PartialType } from '@nestjs/mapped-types';
 import {
-  IsBoolean,
   IsOptional,
   IsString,
   IsUrl,
-  ArrayNotEmpty,
-  ArrayUnique,
-  ValidateNested,
-  ArrayMinSize,
   IsUUID,
   IsEnum,
   IsNotEmpty,
   MaxLength,
+  IsNumber,
 } from 'class-validator';
 
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 
 export enum ConversationMemberRole {
   ADMIN = 'ADMIN',
@@ -29,37 +25,10 @@ export enum MediaType {
   STICKER = 'STICKER',
 }
 
-export class ChatParticipantsDTO {
+export class CreateMessageDTO {
   @IsUUID()
-  userId: string;
+  senderId: string;
 
-  @IsEnum(ConversationMemberRole)
-  @IsOptional()
-  role?: ConversationMemberRole = ConversationMemberRole.MEMBER;
-}
-
-export class CreateChatDTO {
-  @IsBoolean()
-  @IsOptional()
-  isGroup?: boolean = false;
-
-  @IsString()
-  @IsOptional()
-  name?: string;
-
-  @IsUrl()
-  @IsOptional()
-  avatarUrl?: string;
-
-  @ArrayNotEmpty()
-  @ValidateNested({ each: true })
-  @ArrayUnique((participant: ChatParticipantsDTO) => participant.userId)
-  @Type(() => ChatParticipantsDTO)
-  @ArrayMinSize(1, { message: 'At least one participant is required' })
-  participants: ChatParticipantsDTO[];
-}
-
-export class CreateMessageDTO extends CreateChatDTO {
   @IsUUID()
   @IsOptional()
   chatId?: string;
@@ -88,3 +57,14 @@ export class CreateMessageDTO extends CreateChatDTO {
 }
 
 export class UpdateMessageDTO extends PartialType(CreateMessageDTO) {}
+
+export class GetMessageDTO {
+  @IsUUID()
+  chatId: string;
+
+  @IsUUID()
+  lastMessageId: string;
+
+  @IsNumber()
+  limit: number;
+}

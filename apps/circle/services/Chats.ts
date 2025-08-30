@@ -35,3 +35,17 @@ export const FetchUserChats = async (type?: string) => {
     throw new Error("An error occurred while finding or creating a chat");
   }
 };
+
+export const SendMessage = async (message: FormData) => {
+  try {
+    const res = await api.post("/send", message);
+
+    return res.data;
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Chat Error:", err.message);
+      throw err;
+    }
+    throw new Error("An error occurred while sending message");
+  }
+};
