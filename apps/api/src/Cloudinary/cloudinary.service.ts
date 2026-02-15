@@ -22,10 +22,10 @@ export class CloudinaryService {
         cloudinary.uploader
           .upload_stream(
             {
-              folder: `circle/${options.folder}`,
-              resource_type: options.media_type ?? 'image',
+              folder: `circle/${options?.folder}`,
+              resource_type: options?.media_type ?? 'image',
               transformation:
-                options.media_type === 'image'
+                options?.media_type === 'image'
                   ? [
                       { width: 500, height: 500, crop: 'fill' },
                       { quality: 'auto' },

@@ -14,33 +14,32 @@ import { CreateMessageDTO, GetMessageDTO } from '@/messages/dto/message.dto';
 export class MessageService {
   constructor(private readonly db: PrismaService) {}
 
-  async sendMessage(
-    data: CreateMessageDTO,
-    @Req() req: Request & { user: admin.auth.DecodedIdToken },
-  ) {
-    const { uid } = req.user;
+  async sendMessage(data: CreateMessageDTO, uid: string) {
+    if (!data.chatId) {
+      throw new BadRequestException('Chat ID is required');
+    }
 
+    const chatId = data.chatId;
+
+    // Step 1: Get user
     const user = await this.db.user.findUnique({
-      where: {
-        firebaseId: uid,
-      },
-      select: {
-        id: true,
-      },
+      where: { firebaseId: uid },
+      select: { id: true },
     });
 
     if (!user) {
       throw new BadRequestException('Current user does not exist');
     }
 
-    const chatparticipants = await this.db.chatParticipants.findUnique({
+    // Step 2: Validate chat participation
+    const chatParticipant = await this.db.chatParticipants.findFirst({
       where: {
-        userId_chatId: {
-          userId: user.id,
-          chatId: data.chatId,
-        },
+        userId: user.id,
+        chatId,
+        leftAt: null,
       },
-      include: {
+      select: {
+        role: true,
         chat: {
           select: {
             isGroup: true,
@@ -52,176 +51,149 @@ export class MessageService {
       },
     });
 
-    if (!chatparticipants || chatparticipants.leftAt) {
+    if (!chatParticipant) {
       throw new ForbiddenException('You are not a participant in this chat');
     }
 
+    // Step 3: Check admin permissions
     if (
-      chatparticipants.chat.isGroup &&
-      chatparticipants.role !== 'ADMIN' &&
-      chatparticipants.chat.onlyAdminsCanMessage
+      chatParticipant.chat.isGroup &&
+      chatParticipant.role !== 'ADMIN' &&
+      chatParticipant.chat.onlyAdminsCanMessage
     ) {
       throw new ForbiddenException('Admins can only send message');
     }
 
-    if (!chatparticipants.chat.isGroup) {
-      const { participant1Id, participant2Id } = chatparticipants.chat;
-
+    // Step 4: Check block status
+    if (!chatParticipant.chat.isGroup) {
+      const { participant1Id, participant2Id } = chatParticipant.chat;
       const otherParticipantId =
-        participant1Id !== user.id ? participant2Id : participant1Id;
+        participant1Id === user.id ? participant2Id : participant1Id;
 
       if (otherParticipantId) {
-        const blockStatus = await this.db.blockedUser.findFirst({
+        const isBlocked = await this.db.blockedUser.findFirst({
           where: {
             OR: [
-              {
-                blockingUserId: otherParticipantId,
-                blockedUserId: user.id,
-              },
-              {
-                blockingUserId: user.id,
-                blockedUserId: otherParticipantId,
-              },
+              { blockingUserId: otherParticipantId, blockedUserId: user.id },
+              { blockingUserId: user.id, blockedUserId: otherParticipantId },
             ],
           },
-          select: {
-            blockedUserId: true,
-            blockingUserId: true,
-          },
+          select: { blockingUserId: true },
         });
 
-        if (blockStatus) {
-          if (blockStatus.blockingUserId === user.id) {
-            throw new ForbiddenException(
-              'You cannot send messages to this user as you have blocked them',
-            );
-          } else {
-            throw new ForbiddenException(
-              'You cannot send messages to this user as they have blocked you',
-            );
-          }
+        if (isBlocked) {
+          const message =
+            isBlocked.blockingUserId === user.id
+              ? 'You cannot send messages to this user as you have blocked them'
+              : 'You cannot send messages to this user as they have blocked you';
+          throw new ForbiddenException(message);
         }
       }
     }
 
+    // Step 5: Validate replied message
     if (data.repliedToId) {
-      const repliedMessage = await this.db.message.findFirst({
-        where: {
-          id: data.repliedToId,
-          chatId: data.chatId,
-        },
+      const repliedMessageExists = await this.db.message.findFirst({
+        where: { id: data.repliedToId, chatId },
+        select: { id: true },
       });
 
-      if (!repliedMessage) {
+      if (!repliedMessageExists) {
         throw new BadRequestException('Replied message not found in this chat');
       }
     }
 
-    const result = await this.db.$transaction(async (tx) => {
-      const message = await tx.message.create({
-        data: {
-          text: data.text,
-          senderId: data.senderId,
-          repliedToId: data.repliedToId,
-          mediaId: data.mediaId,
-          mediaUrl: data.mediaUrl,
-          mediaType: data.mediaType,
-          chatId: data.chatId,
+    // Step 6: Create message - NO TRANSACTION
+    const message = await this.db.message.create({
+      data: {
+        text: data.text,
+        senderId: data.senderId,
+        repliedToId: data.repliedToId,
+        mediaId: data.mediaId,
+        mediaUrl: data.mediaUrl,
+        mediaType: data.mediaType,
+        chatId,
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            phoneNumber: true,
+            profileImage: true,
+          },
         },
-        include: {
-          sender: {
-            select: {
-              id: true,
-              name: true,
-              phoneNumber: true,
-              profileImage: true,
-            },
-          },
-          repliedTo: {
-            select: {
-              sender: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-            },
-          },
-          chat: {
-            include: {
-              participants: {
-                where: {
-                  leftAt: null,
-                },
-                select: {
-                  userId: true,
-                  role: true,
-                },
+        repliedTo: {
+          select: {
+            sender: {
+              select: {
+                id: true,
+                name: true,
               },
             },
           },
         },
-      });
+      },
+    });
 
-      const recipients = message.chat.participants.filter(
-        (p) => p.userId !== user.id,
-      );
+    // Step 7: Get recipients - separate query
+    const allParticipants = await this.db.chatParticipants.findMany({
+      where: {
+        chatId,
+        leftAt: null,
+        userId: { not: user.id }, // Exclude sender
+      },
+      select: { userId: true },
+    });
 
-      // creating delivery status
-      if (recipients.length > 0) {
-        if (recipients.length === 1 && !chatparticipants.chat.isGroup) {
-          await tx.deliveredStatus.create({
-            data: {
-              messageId: message.id,
-              userId: recipients[0].userId,
-              status: 'SENT',
-            },
-          });
-        } else {
-          const deliveryStatusRecords = recipients.map((participant) => ({
+    const recipientUserIds = allParticipants.map((p) => p.userId);
+
+    // Step 8: Create delivery status - separate operation
+    if (recipientUserIds.length > 0) {
+      try {
+        await this.db.deliveredStatus.createMany({
+          data: recipientUserIds.map((userId) => ({
             messageId: message.id,
-            userId: participant.userId,
+            userId,
             status: 'SENT' as const,
-            createdAt: new Date(),
-          }));
-
-          await tx.deliveredStatus.createMany({
-            data: deliveryStatusRecords,
-          });
-        }
+          })),
+          skipDuplicates: true,
+        });
+      } catch (deliveryError) {
+        // Log error but don't fail the entire operation
+        console.error('Failed to create delivery status:', deliveryError);
       }
+    }
 
-      await tx.chat.update({
-        where: {
-          id: message.chatId,
-        },
+    // Step 9: Update chat last message - separate operation
+    try {
+      await this.db.chat.update({
+        where: { id: chatId },
         data: {
           lastMessageId: message.id,
           lastMessageAt: message.sentAt,
         },
       });
+    } catch (updateError) {
+      // Log error but don't fail the entire operation
+      console.error('Failed to update chat last message:', updateError);
+    }
 
-      return {
-        message,
-        recipientIds: recipients.map((p) => p.userId),
-      };
-    });
-
+    // Return the response
     return {
-      id: result.message.id,
-      text: result.message.text,
-      mediaType: result.message.mediaType,
-      mediaUrl: result.message.mediaUrl,
-      mediaId: result.message.mediaId,
-      sentAt: result.message.sentAt,
-      edited: result.message.edited,
-      chatId: data.chatId,
-      sender: result.message.sender,
-      repliedTo: result.message.repliedTo,
-      recipientIds: result.recipientIds,
+      id: message.id,
+      text: message.text,
+      mediaType: message.mediaType,
+      mediaUrl: message.mediaUrl,
+      mediaId: message.mediaId,
+      sentAt: message.sentAt,
+      edited: message.edited,
+      chatId,
+      sender: message.sender,
+      repliedTo: message.repliedTo,
+      recipientIds: recipientUserIds,
     };
   }
-
   async GetChatMessages(
     data: GetMessageDTO,
     @Req() req: Request & { user: admin.auth.DecodedIdToken },
@@ -277,7 +249,7 @@ export class MessageService {
       orderBy: {
         sentAt: 'desc',
       },
-      take: limit + 1,
+      take: Number(limit + 1),
       cursor: lastMessageId ? { id: lastMessageId } : undefined,
       skip: lastMessageId ? 1 : 0,
     });

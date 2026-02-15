@@ -17,6 +17,8 @@ lerna-debug.log*
 # OS
 .DS_Store
 
+.vscode
+
 # Temp
 .temp
 .tmp

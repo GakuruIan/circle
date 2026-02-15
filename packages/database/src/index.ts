@@ -1,5 +1,2 @@
-export { prisma } from "./client.js";
-
-// Export Prisma types and utilities
-export { PrismaClient } from "@prisma/client";
-export * from "@prisma/client";
+export { prisma, PrismaClient, adapter } from "./client.js";
+export * from "../generated/prisma/client.js";

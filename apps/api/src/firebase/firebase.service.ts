@@ -15,7 +15,7 @@ export class FirebaseService implements OnModuleInit {
     });
   }
 
-  async verifyIdToken(idToken: string) {
+  async verifyIdToken(idToken: string): Promise<admin.auth.DecodedIdToken> {
     if (!idToken) {
       throw new Error('No ID token provided');
     }

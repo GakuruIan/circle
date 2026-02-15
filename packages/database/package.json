@@ -1,15 +1,16 @@
 {
   "name": "@circle/prisma",
   "version": "1.0.0",
-  "type": "commonjs",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "author": "GakuruIan",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+     "development": "./src/index.ts",
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
     }
   },
   "files": [
@@ -25,12 +26,18 @@
     "db:studio": "prisma studio",
     "clean": "rm -rf dist"
   },
-  "devDependencies": {
-    "prisma": "^6.10.1",
-    "typescript": "^5.0.0"
-  },
+  
   "dependencies": {
-    "@prisma/client": "^6.10.1",
-    "@prisma/extension-accelerate": "^2.0.1"
+    "@prisma/adapter-pg": "^7.4.0",
+    "@prisma/client": "^7.4.0",
+    "@prisma/extension-accelerate": "^3.0.1",
+    "dotenv": "^17.3.1",
+    "pg": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "@types/pg": "^8.16.0",
+    "prisma": "^7.4.0",
+    "typescript": "^5.9.3"
   }
 }

@@ -49,3 +49,31 @@ export const SendMessage = async (message: FormData) => {
     throw new Error("An error occurred while sending message");
   }
 };
+
+export const FetchChatMessages = async ({
+  chatId,
+  lastMessageId = null,
+  limit = 20,
+}: {
+  chatId: string;
+  lastMessageId?: string | null;
+  limit?: number;
+}) => {
+  try {
+    const res = await api.get("/messages", {
+      params: {
+        chatId,
+        lastMessageId,
+        limit,
+      },
+    });
+
+    return res.data;
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Message Error:", err.message);
+      throw err;
+    }
+    throw new Error("An error occurred while fetching messages");
+  }
+};

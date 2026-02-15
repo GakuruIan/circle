@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
   Text,
@@ -45,7 +45,7 @@ const profileSchema = z.object({
     .max(20, "username cannot be more than 20 characters")
     .regex(
       /^[a-zA-Z][a-zA-Z0-9_]*$/,
-      "Username must start with a letter and contain only letters, numbers, and underscores."
+      "Username must start with a letter and contain only letters, numbers, and underscores.",
     ),
   about: z
     .string({ required_error: "About is required" })
@@ -53,14 +53,20 @@ const profileSchema = z.object({
     .max(200, "About cannot be more than 200 characters.")
     .regex(
       /^[\w\s.,!?'"@#&()\-:;]*$/,
-      "About can only contain letters, numbers, spaces, and basic punctuation."
+      "About can only contain letters, numbers, spaces, and basic punctuation.",
     ),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 const Setup = () => {
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/(tabs)/chats");
+    }
+  }, [user]);
 
   const [isLoading, setLoading] = useState(false);
   const [capturedMedia, setCapturedMedia] = useState<string | null>(null);
@@ -81,14 +87,16 @@ const Setup = () => {
       formData.append("name", username);
       formData.append("about", about);
 
-      const fileName = capturedMedia?.split("/").pop()!;
-      const fileType = fileName.split(".").pop();
+      if (capturedMedia) {
+        const fileName = capturedMedia?.split("/").pop()!;
+        const fileType = fileName.split(".").pop();
 
-      formData.append("photo", {
-        uri: capturedMedia,
-        name: fileName,
-        type: `image/${fileType}`,
-      } as any);
+        formData.append("photo", {
+          uri: capturedMedia,
+          name: fileName,
+          type: `image/${fileType}`,
+        } as any);
+      }
 
       const user = await createUserMutation.mutateAsync(formData);
 

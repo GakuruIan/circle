@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { FirebaseGuardAuth } from '@/firebase/firebase-auth.guard';
 
-import { Response, Request } from 'express';
+import type { Response, Request } from 'express';
 
 import { ChatService } from './chats.service';
 import { CreateChatDTO } from './dto/chat.dto';
@@ -45,6 +45,10 @@ export class ChatController {
         },
       });
 
+      if (!user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
       const chat = await this.chatservice.FindOrCreateChat(user.id, dto);
 
       return res.status(200).send(chat);
@@ -71,6 +75,10 @@ export class ChatController {
           id: true,
         },
       });
+
+      if (!user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
 
       const chats = await this.chatservice.GetUsersChat(user.id);
 

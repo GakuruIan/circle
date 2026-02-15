@@ -4,12 +4,13 @@ import {
   Get,
   HttpStatus,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 
-import { Response, Request } from 'express';
+import type { Response, Request } from 'express';
 
 // auth guard
 import { FirebaseGuardAuth } from '@/firebase/firebase-auth.guard';
@@ -41,7 +42,7 @@ export class MessagesController {
 
   @Get()
   async FetchMessages(
-    @Body() dto: GetMessageDTO,
+    @Query() dto: GetMessageDTO,
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -53,6 +54,7 @@ export class MessagesController {
 
       res.status(HttpStatus.OK).send(messages);
     } catch (error) {
+      console.log(error);
       return res.status(500).send(error);
     }
   }

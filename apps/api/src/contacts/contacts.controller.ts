@@ -10,7 +10,7 @@ import {
   Param,
 } from '@nestjs/common';
 
-import { Response, Request } from 'express';
+import type { Response, Request } from 'express';
 
 import { FirebaseGuardAuth } from '@/firebase/firebase-auth.guard';
 import { ContactsService } from './contacts.service';

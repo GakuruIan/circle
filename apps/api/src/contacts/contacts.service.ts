@@ -6,6 +6,12 @@ import { PrismaService } from '@/prisma/prisma.service';
 // contact dto
 import { ContactsDto } from './dto/contacts.dto';
 
+type RegisteredUser = {
+  phoneNumber: string;
+  name: string;
+  firebaseId: string;
+};
+
 @Injectable()
 export class ContactsService {
   constructor(private readonly db: PrismaService) {}
@@ -25,8 +31,6 @@ export class ContactsService {
       this.NormalizePhoneNumber(contact.phonenumber),
     );
 
-    console.log(phonenumbers);
-
     const registedUsers = await this.db.user.findMany({
       where: { phoneNumber: { in: phonenumbers }, NOT: { firebaseId: uid } },
       select: {
@@ -36,26 +40,28 @@ export class ContactsService {
       },
     });
 
-    const userMap = new Map(
+    const userMap = new Map<string, RegisteredUser>(
       registedUsers.map((user) => [user.phoneNumber, user]),
     );
 
     const contactsToSync = contacts
       .map((contact) => {
         const normalizedPhone = this.NormalizePhoneNumber(contact.phonenumber);
-        const registedUser = userMap.get(normalizedPhone);
-        if (!registedUser) return null;
+
+        const registeredUser = userMap.get(normalizedPhone);
+
+        if (!registeredUser) return null;
 
         return this.db.contacts.upsert({
           where: {
             userId_contactUserId: {
               userId: uid,
-              contactUserId: registedUser.firebaseId,
+              contactUserId: registeredUser.firebaseId,
             },
           },
           create: {
             userId: uid,
-            contactUserId: registedUser.firebaseId,
+            contactUserId: registeredUser.firebaseId,
             displayName: contact.displayName,
             phonenumber: contact.phonenumber,
           },
@@ -65,7 +71,7 @@ export class ContactsService {
           },
         });
       })
-      .filter(Boolean);
+      .filter((c): c is NonNullable<typeof c> => c !== null);
 
     await this.db.$transaction(contactsToSync);
 

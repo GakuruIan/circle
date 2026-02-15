@@ -1,3 +1,6 @@
+import 'react-native-reanimated';
+import 'react-native-get-random-values';
+
 import React, { useState, useEffect } from "react";
 import { ActivityIndicator, Text, View, Animated } from "react-native";
 

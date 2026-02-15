@@ -18,7 +18,12 @@ const dummyChats = [
 ];
 
 const ChatTabScene = ({ category }: { category: string }) => {
-  const { isLoading, data: chats, isError } = useFetchUserChats(category);
+  const {
+    isLoading,
+    data: chats,
+    isError,
+    error,
+  } = useFetchUserChats(category);
 
   if (isLoading) {
     return (
@@ -28,7 +33,8 @@ const ChatTabScene = ({ category }: { category: string }) => {
     );
   }
 
-  if (isError) {
+  if (isError && !isLoading) {
+    console.log(error);
     return (
       <View className="flex-1 items-center justify-center p-4">
         <Text className="text-center dark:text-white text-lg font-medium">

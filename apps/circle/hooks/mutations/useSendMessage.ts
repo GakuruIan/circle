@@ -29,50 +29,74 @@ export const useSendMessage = () => {
         throw new Error("Socket not connected");
       }
 
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       socket.emit("message:send", message);
       return message;
     },
     onMutate: async (message) => {
       const { chatId } = message;
 
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       // cancel any outgoing refreshes
       await queryClient.cancelQueries({
         queryKey: [...queryKeys.chats, "messages", chatId],
       });
 
-      // get prev messages
+      //  get prev messages
       const prevMessages = await queryClient.getQueryData([
         ...queryKeys.chats,
         "messages",
         chatId,
       ]);
 
-      //   optimistic message
+      //   //   optimistic message
       const optimisticMessage = {
-        id: `temp-${Date.now()}`,
+        _id: `temp-${Date.now()}`,
         text: message.text,
-        sentAt: new Date().toISOString(),
-        sender: {
-          id: user?.id,
-          name: "You",
+        createdAt: new Date(),
+        user: {
+          _id: user?.id ?? "me",
+          name: user?.name ?? "You",
+          avatar: user?.profileImage ?? undefined,
         },
-        chatId,
-        isPending: true,
-        optimistic: true,
+        pending: true,
       };
 
       // updating cache
       queryClient.setQueryData(
         [...queryKeys.chats, "messages", chatId],
         (old: any) => {
-          if (!old?.pages?.[0]) return old;
+          if (!old) {
+            return {
+              pages: [
+                {
+                  messages: [optimisticMessage],
+                  nextMessageId: null,
+                },
+              ],
+              pageParams: [null],
+            };
+          }
 
-          const newPages = [...old.pages];
+          if (!old.pages || !Array.isArray(old.pages)) {
+            return old;
+          }
 
-          newPages[0] = {
-            ...newPages[0],
-            messages: [optimisticMessage, ...newPages[0].messages],
-          };
+          const newPages = old.pages.map((page: any, index: number) => {
+            if (index === 0) {
+              return {
+                ...page,
+                messages: [optimisticMessage, ...(page.messages || [])],
+              };
+            }
+            return page;
+          });
 
           return {
             ...old,
@@ -86,11 +110,11 @@ export const useSendMessage = () => {
         if (!old) return old;
 
         return old.map((chat: any) => {
-          if (chat.id === chatId) {
+          if (chat?.id === chatId) {
             return {
               ...chat,
               lastMessage: optimisticMessage,
-              lastMessageAt: optimisticMessage.sentAt,
+              lastMessageAt: optimisticMessage.createdAt,
             };
           }
           return chat;

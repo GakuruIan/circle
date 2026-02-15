@@ -20,50 +20,56 @@ export class AuthService {
     @Req() req: Request & { user: admin.auth.DecodedIdToken },
     photo?: Express.Multer.File,
   ) {
-    const { uid, phone_number } = req.user;
+    try {
+      const { uid, phone_number } = req.user;
 
-    if (!phone_number || !uid) {
-      throw new BadRequestException('Invalid Firebase token');
-    }
+      if (!phone_number || !uid) {
+        throw new BadRequestException('Invalid Firebase token');
+      }
 
-    const existingUser = await this.db.user.findUnique({
-      where: { firebaseId: uid },
-    });
-
-    if (existingUser) {
-      throw new BadRequestException('User already exists');
-    }
-
-    let photoUrl: UploadApiResponse | undefined = undefined;
-
-    if (photo) {
-      photoUrl = await this.cloudinary.uploadImage(photo, {
-        folder: 'user_profiles',
-        media_type: 'image',
+      const existingUser = await this.db.user.findUnique({
+        where: { firebaseId: uid },
       });
+
+      if (existingUser) {
+        throw new BadRequestException('User already exists');
+      }
+
+      let photoUrl: UploadApiResponse | undefined = undefined;
+
+      if (photo) {
+        photoUrl = await this.cloudinary.uploadImage(photo, {
+          folder: 'user_profiles',
+          media_type: 'image',
+        });
+      }
+
+      const user = await this.db.user.create({
+        data: {
+          name: data.name,
+          firebaseId: uid,
+          about: data.about,
+          phoneNumber: phone_number,
+          hasCompletedSetup: true,
+          profileImage: photoUrl?.secure_url,
+          imageId: photoUrl?.public_id,
+        },
+        select: {
+          id: true,
+          name: true,
+          about: true,
+          profileImage: true,
+          hasCompletedSetup: true,
+          firebaseId: true,
+          phoneNumber: true,
+        },
+      });
+
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
-
-    const user = await this.db.user.create({
-      data: {
-        name: data.name,
-        firebaseId: uid,
-        about: data.about,
-        phoneNumber: phone_number,
-        hasCompletedSetup: true,
-        profileImage: photoUrl?.secure_url,
-        imageId: photoUrl.public_id,
-      },
-      select: {
-        name: true,
-        about: true,
-        profileImage: true,
-        hasCompletedSetup: true,
-        firebaseId: true,
-        phoneNumber: true,
-      },
-    });
-
-    return user;
   }
 
   async updateUser(
@@ -87,7 +93,7 @@ export class AuthService {
 
     let photoUrl: UploadApiResponse | undefined = undefined;
 
-    if (photo && existingUser.profileImage) {
+    if (photo && existingUser.profileImage && existingUser.imageId) {
       await this.cloudinary.deleteImage(existingUser.imageId);
     }
 

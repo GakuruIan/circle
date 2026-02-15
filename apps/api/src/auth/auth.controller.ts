@@ -11,7 +11,7 @@ import {
   Param,
   Req,
 } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
