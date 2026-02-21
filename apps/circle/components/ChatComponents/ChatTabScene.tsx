@@ -7,16 +7,6 @@ import ChatList from "./ChatList";
 // hooks
 import { useFetchUserChats } from "@/hooks/queries/useFetchChats";
 
-// Dummy data simulating server response
-const dummyChats = [
-  { id: 1, type: "group", name: "Dev Team" },
-  { id: 2, type: "family", name: "Mom" },
-  { id: 3, type: "group", name: "Study Buddies" },
-  { id: 4, type: "family", name: "Dad" },
-  { id: 5, type: "work", name: "CEO" },
-  { id: 6, type: "all", name: "Alice" },
-];
-
 const ChatTabScene = ({ category }: { category: string }) => {
   const {
     isLoading,

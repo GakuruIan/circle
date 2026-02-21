@@ -67,7 +67,11 @@ import { useUser } from "@/hooks/stores/userStore";
 
 type CustomSwipeProps = SwipeableProps & SwipeableMethods;
 
+// router
+import { useRouter } from "expo-router";
+
 const Chat = () => {
+  const router = useRouter();
   // chat id
   const { chatid } = useLocalSearchParams<{ chatid: string }>();
 
@@ -136,7 +140,7 @@ const Chat = () => {
 
       sendMutation.mutateAsync(payload);
     },
-    [chatid, replyMessage?._id, user?.id]
+    [chatid, replyMessage?._id, user?.id],
   );
 
   const updateRowRef = useCallback(
@@ -145,7 +149,7 @@ const Chat = () => {
         SwipeableRowRef.current = ref;
       }
     },
-    [replyMessage]
+    [replyMessage],
   );
 
   const styles = StyleSheet.create({
@@ -170,7 +174,9 @@ const Chat = () => {
         className="flex-row items-center w-full justify-between px-2.5"
       >
         <View className="flex-row items-center">
-          <ThemeIcon icon={ChevronLeft} size={24} className="mr-2" />
+          <TouchableOpacity onPress={() => router.back()}>
+            <ThemeIcon icon={ChevronLeft} size={24} className="mr-2" />
+          </TouchableOpacity>
 
           {/* user avatar,name and last seen */}
           <View className="flex-row items-center">

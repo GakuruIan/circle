@@ -10,6 +10,7 @@ import {
   UseGuards,
   Param,
   Req,
+  Get,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -47,5 +48,21 @@ export class AuthController {
     const user = await this.authService.updateUser(id, dto, photo);
 
     res.status(200).send(user);
+  }
+
+  @Get('me')
+  @UseGuards(FirebaseGuardAuth)
+  async me(@Req() req: Request & { user: admin.auth.DecodedIdToken }) {
+    const user = await this.authService.getUserById(req.user.uid);
+    return user;
+  }
+
+  @Get('check-user-onboarding')
+  @UseGuards(FirebaseGuardAuth)
+  async checkUserOnboarding(
+    @Req() req: Request & { user: admin.auth.DecodedIdToken },
+  ) {
+    const user = await this.authService.checkUserOnboarding(req.user.uid);
+    return user;
   }
 }

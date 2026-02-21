@@ -79,7 +79,7 @@ const ContactList = () => {
           .sort((a, b) =>
             a.displayName.localeCompare(b.displayName, undefined, {
               sensitivity: "base",
-            })
+            }),
           );
 
         const formData = new FormData();
@@ -91,6 +91,7 @@ const ContactList = () => {
           setContacts(userContacts);
           setFilteredContacts(userContacts);
         } catch (error) {
+          console.log(error);
           console.error("Failed to sync contacts", error);
         }
       }

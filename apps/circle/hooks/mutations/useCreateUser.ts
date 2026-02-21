@@ -14,9 +14,9 @@ export const useCreateUser = () => {
         });
         return response.data;
       } catch (error) {
-        console.log(error);
+        console.log(error.response.data);
         throw new Error(
-          error.response.data?.error || "Failed to create profile"
+          error.response.data?.error || "Failed to create profile",
         );
       }
     },

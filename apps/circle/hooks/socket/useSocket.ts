@@ -12,13 +12,14 @@ import { createSocketHandlers } from "./socketHandlers";
 import auth from "@react-native-firebase/auth";
 
 const SOCKET_URL =
-  process.env.EXPO_SERVER_BASE_URL || "http://192.168.100.10:4000";
+  process.env.EXPO_SERVER_BASE_URL?.replace("/api/v1", "") ||
+  "http://10.0.2.2:4000";
+
+let socket: Socket | null = null;
 
 export const useSocket = () => {
-  const socketRef = useRef<Socket | null>(null);
   const queryClient = useQueryClient();
-
-  const [token, setToken] = useState<string | null>(null);
+  const [, setConnected] = useState(socket?.connected ?? false);
 
   const user = auth().currentUser;
 
@@ -29,27 +30,13 @@ export const useSocket = () => {
   const handlers = createSocketHandlers(queryClient);
 
   useEffect(() => {
-    // Get initial token
-    const fetchToken = async () => {
-      const user = auth().currentUser;
-      if (!user) return;
-
-      const idToken = await user.getIdToken(true);
-      setToken(idToken);
-    };
-
-    fetchToken();
-
-    // Listen for token refresh
+    // Listen for token refresh and update socket auth
     const unsubscribe = auth().onIdTokenChanged(async (user) => {
       if (user) {
         const idToken = await user.getIdToken(true);
-        setToken(idToken);
-
-        // If already connected socket, update auth and reconnect
-        if (socketRef.current) {
-          socketRef.current.auth = { token: idToken };
-          socketRef.current.disconnect().connect();
+        if (socket) {
+          socket.auth = { token: idToken };
+          socket.disconnect().connect();
         }
       }
     });
@@ -58,53 +45,51 @@ export const useSocket = () => {
   }, []);
 
   useEffect(() => {
-    if (!socketRef.current) {
-      const socket = io(SOCKET_URL, {
-        transports: ["websocket"],
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        auth: {
-          token,
-        },
-      });
+    if (!socket) {
+      const initSocket = async () => {
+        const idToken = await user.getIdToken(true);
 
-      socketRef.current = socket;
+        socket = io(SOCKET_URL, {
+          transports: ["websocket"],
+          autoConnect: true,
+          reconnection: true,
+          reconnectionAttempts: 5,
+          auth: {
+            token: idToken,
+          },
+        });
 
-      //   debugging logs
-      socket.on("connect", () => {
-        console.log("Socket connected: ", socket.id);
-      });
+        // debugging logs
+        socket.on("connect", () => {
+          console.log("Socket connected: ", socket?.id);
+          setConnected(true);
+        });
 
-      socket.on("disconnect", (reason) => {
-        console.log("Socket disconnected ", reason);
-      });
+        socket.on("disconnect", (reason) => {
+          console.log("Socket disconnected ", reason);
+          setConnected(false);
+        });
 
-      socket.on("connect_error ", (err) => {
-        console.log("Socket connection error ", err.message);
-      });
+        socket.on("connect_error", (err) => {
+          console.log("Socket connection error ", err.message);
+        });
 
-      // update senders ui when sending messages
-      socket.on("message:confirmed", handlers.handleMessageConfirmed);
+        // update senders ui when sending messages
+        socket.on("message:confirmed", handlers.handleMessageConfirmed);
 
-      // update ui on the recievers side
-      socket.on("message:new", handlers.handleNewMessage);
-
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.off(
-            "message:confirmed",
-            handlers.handleMessageConfirmed
-          );
-
-          socketRef.current.off("message:new", handlers.handleNewMessage);
-
-          socketRef.current.disconnect();
-          socketRef.current = null;
-        }
+        // update ui on the recievers side
+        socket.on("message:new", handlers.handleNewMessage);
       };
+
+      initSocket();
     }
+
+    return () => {
+      // We keep the socket alive as a singleton, only cleanup listeners if needed
+      // or if we truly want to close connection on unmount of the entire app
+      // For a hook used in many places, we might want to keep it or handle global lifecycle
+    };
   }, []);
 
-  return socketRef.current;
+  return socket;
 };

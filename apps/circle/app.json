@@ -10,8 +10,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cirle.myapp",
-      "googleServicesFile":"./GoogleService-info.json"
+      "bundleIdentifier": "com.cirle.myapp"
+     
     },
     "android": {
       "adaptiveIcon": {

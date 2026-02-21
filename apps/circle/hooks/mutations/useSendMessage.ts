@@ -25,8 +25,8 @@ export const useSendMessage = () => {
 
   return useMutation({
     mutationFn: async (message: MessageProps) => {
-      if (!socket?.connected) {
-        throw new Error("Socket not connected");
+      if (!socket) {
+        throw new Error("Socket not initialized");
       }
 
       if (!user) {
@@ -57,15 +57,16 @@ export const useSendMessage = () => {
 
       //   //   optimistic message
       const optimisticMessage = {
-        _id: `temp-${Date.now()}`,
+        id: `temp-${Date.now()}`,
         text: message.text,
-        createdAt: new Date(),
-        user: {
-          _id: user?.id ?? "me",
+        sentAt: new Date().toISOString(),
+        sender: {
+          id: user?.id ?? "me",
           name: user?.name ?? "You",
-          avatar: user?.profileImage ?? undefined,
+          profileImage: user?.profileImage ?? undefined,
         },
         pending: true,
+        optimistic: true,
       };
 
       // updating cache
@@ -102,7 +103,7 @@ export const useSendMessage = () => {
             ...old,
             pages: newPages,
           };
-        }
+        },
       );
 
       // Update chat's last message
@@ -114,7 +115,7 @@ export const useSendMessage = () => {
             return {
               ...chat,
               lastMessage: optimisticMessage,
-              lastMessageAt: optimisticMessage.createdAt,
+              lastMessageAt: optimisticMessage.sentAt,
             };
           }
           return chat;
@@ -128,7 +129,7 @@ export const useSendMessage = () => {
       if (context?.prevMessages && context.chatId) {
         queryClient.setQueryData(
           [...queryKeys.chats, "messages", context.chatId],
-          context.prevMessages
+          context.prevMessages,
         );
       }
 

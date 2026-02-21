@@ -161,6 +161,27 @@ export class ChatService {
               mediaType: true,
               edited: true,
               mediaUrl: true,
+              deliveredTo: {
+                select: {
+                  readAt: true,
+                  status: true,
+                  deliveredAt: true,
+                },
+              },
+            },
+          },
+          _count: {
+            select: {
+              messages: {
+                where: {
+                  deliveredTo: {
+                    some: {
+                      userId: currentUserId,
+                      status: { not: 'READ' },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -190,10 +211,10 @@ export class ChatService {
         id: chat.id,
         isGroup: chat.isGroup,
         name:
-          otherParticipant.contactOf?.[0]?.displayName ||
+          otherParticipant?.contactOf[0]?.displayName ||
           otherParticipant.phoneNumber,
         avatarUrl: otherParticipant.profileImage,
-        participants: chat.participants,
+        unreadCount: chat._count?.messages || 0,
         lastMessage: chat.lastMessage
           ? {
               id: chat.lastMessage.id,
@@ -214,6 +235,7 @@ export class ChatService {
       isGroup: chat.isGroup,
       name: chat.name,
       avatarUrl: chat.avatarUrl,
+      unreadCount: chat._count?.messages || 0,
       participants: chat.participants,
       lastMessage: chat.lastMessage
         ? {

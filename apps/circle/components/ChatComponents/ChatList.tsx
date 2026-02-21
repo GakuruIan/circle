@@ -1,4 +1,10 @@
-import { View, Text, FlatList, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
 import React, { useState } from "react";
 
 // components
@@ -38,7 +44,15 @@ const ChatList = ({ chats }: props) => {
           </View>
         )}
         keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-        renderItem={({ item }) => <Message />}
+        renderItem={({ item }) => (
+          <Message
+            id={item.id}
+            username={item.name}
+            time={item.lastMessage.sentAt}
+            message={item.lastMessage.text}
+            unreadCount={item.unreadCount}
+          />
+        )}
         ListEmptyComponent={() => (
           <View
             style={{

@@ -3,7 +3,7 @@ import auth from "@react-native-firebase/auth";
 import { router } from "expo-router";
 
 const api = axios.create({
-  baseURL: `http://192.168.100.10:4000/api/v1`,
+  baseURL: `http://10.0.2.2:4000/api/v1`,
 });
 
 api.interceptors.request.use(async (config) => {
@@ -42,7 +42,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

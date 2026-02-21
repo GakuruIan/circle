@@ -29,8 +29,12 @@ import ThemeIcon from "@/components/UI/ThemeIcon";
 // firebase
 import auth from "@react-native-firebase/auth";
 
+// context
+import { useUserStore } from "@/hooks/stores/userStore";
+
 const TabLayout = () => {
   const { colorScheme } = useColorScheme();
+  const { setUser } = useUserStore();
   const isDark = colorScheme === "dark";
 
   // Colors based on theme
@@ -185,6 +189,7 @@ const TabLayout = () => {
               className="mr-3"
               onPress={async () => {
                 await auth().signOut();
+                setUser(null);
                 router.replace("/(auth)/signup");
               }}
             >

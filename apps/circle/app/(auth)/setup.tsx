@@ -38,6 +38,9 @@ import { router } from "expo-router";
 // user store
 import { useUser } from "@/hooks/stores/userStore";
 
+// user query
+import { useGetMe } from "@/hooks/queries/useUser";
+
 const profileSchema = z.object({
   username: z
     .string({ required_error: "Username is required" })
@@ -62,6 +65,8 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 const Setup = () => {
   const { setUser, user } = useUser();
 
+  const { data: me } = useGetMe();
+
   useEffect(() => {
     if (user) {
       router.replace("/(tabs)/chats");
@@ -73,10 +78,23 @@ const Setup = () => {
 
   const createUserMutation = useCreateUser();
 
-  const { control, handleSubmit } = useForm<ProfileFormData>({
+  const { control, handleSubmit, reset } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     mode: "onTouched",
   });
+
+  useEffect(() => {
+    if (me) {
+      reset({
+        username: me.name,
+        about: me.about,
+      });
+    }
+
+    if (me?.profileImage) {
+      setCapturedMedia(me?.profileImage);
+    }
+  }, [me]);
 
   const onSubmit = async (values: ProfileFormData) => {
     setLoading(true);

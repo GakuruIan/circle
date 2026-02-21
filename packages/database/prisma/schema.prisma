@@ -68,9 +68,9 @@ model Contacts {
   displayName   String
   phonenumber   String
 
-  user User @relation("UserContacts", fields: [userId], references: [firebaseId], onDelete: Cascade)
+  user User @relation("UserContacts", fields: [userId], references: [id], onDelete: Cascade)
 
-  contactUser User @relation("ContactUser", fields: [contactUserId], references: [firebaseId], onDelete: Cascade)
+  contactUser User @relation("ContactUser", fields: [contactUserId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

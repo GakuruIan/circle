@@ -6,7 +6,8 @@ import { queryKeys } from "@/lib/queryKey";
 const updateChatList = (
   queryClient: QueryClient,
   chatId: string,
-  message: any
+  message: any,
+  isNewMessage: boolean = false,
 ) => {
   queryClient.setQueryData([...queryKeys.chats, "list"], (old: any) => {
     if (!old) return old;
@@ -24,6 +25,9 @@ const updateChatList = (
             edited: message.edited || false,
           },
           updatedAt: message.sentAt,
+          unreadCount: isNewMessage
+            ? (chat.unreadCount || 0) + 1
+            : chat.unreadCount,
         };
       }
       return chat;
@@ -65,7 +69,7 @@ export const createSocketHandlers = (queryClient: QueryClient) => {
         };
 
         return { ...old, pages: newPages };
-      }
+      },
     );
 
     //  updating the chat list message
@@ -77,7 +81,7 @@ export const createSocketHandlers = (queryClient: QueryClient) => {
     const { chatId } = message;
 
     queryClient.setQueryData(
-      [...queryKeys.chats, "message", chatId],
+      [...queryKeys.chats, "messages", chatId],
       (old: any) => {
         if (!old) return old;
 
@@ -88,9 +92,9 @@ export const createSocketHandlers = (queryClient: QueryClient) => {
           messages: [message, ...newPages[0].messages],
         };
         return { ...old, pages: newPages };
-      }
+      },
     );
-    updateChatList(queryClient, chatId, message);
+    updateChatList(queryClient, chatId, message, true);
   };
 
   return {

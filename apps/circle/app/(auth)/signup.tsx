@@ -80,9 +80,8 @@ const Signup = () => {
       //  firebase auth
       const confirmation = await signInWithPhoneNumber(
         getAuth(),
-        fullPhoneNumber
+        fullPhoneNumber,
       );
-
       setConfirm(confirmation);
     } catch (error) {
       console.error(error);

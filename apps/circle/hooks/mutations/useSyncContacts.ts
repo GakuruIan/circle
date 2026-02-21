@@ -14,6 +14,7 @@ export const useSyncContacts = () => {
         if (!currentUser) {
           throw new Error("No authenticated user found");
         }
+        console.log(data);
 
         const response = await api.post("/contacts/sync", data, {
           headers: {

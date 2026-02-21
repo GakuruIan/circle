@@ -6,7 +6,7 @@ import { queryKeys } from "@/lib/queryKey";
 // services
 import { FetchUserChats } from "@/services/Chats";
 
-export const useFetchUserChats = (type: string | undefined) => {
+export const useFetchUserChats = (type?: string | undefined) => {
   return useQuery({
     queryFn: () => FetchUserChats(type),
     queryKey: [...queryKeys.chats, type],

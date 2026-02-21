@@ -7,6 +7,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { ContactsDto } from './dto/contacts.dto';
 
 type RegisteredUser = {
+  id: string;
   phoneNumber: string;
   name: string;
   firebaseId: string;
@@ -23,8 +24,17 @@ export class ContactsService {
     const { uid } = req.user;
     const { contacts } = dto;
 
-    if (!uid) {
-      throw new BadRequestException('Invalid Firebase token');
+    const user = await this.db.user.findUnique({
+      where: {
+        firebaseId: uid,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('No user found');
     }
 
     const phonenumbers = contacts.map((contact) =>
@@ -32,8 +42,16 @@ export class ContactsService {
     );
 
     const registedUsers = await this.db.user.findMany({
-      where: { phoneNumber: { in: phonenumbers }, NOT: { firebaseId: uid } },
+      where: {
+        phoneNumber: {
+          in: phonenumbers,
+        },
+        NOT: {
+          id: user.id,
+        },
+      },
       select: {
+        id: true,
         phoneNumber: true,
         name: true,
         firebaseId: true,
@@ -55,13 +73,13 @@ export class ContactsService {
         return this.db.contacts.upsert({
           where: {
             userId_contactUserId: {
-              userId: uid,
-              contactUserId: registeredUser.firebaseId,
+              userId: user.id,
+              contactUserId: registeredUser.id,
             },
           },
           create: {
-            userId: uid,
-            contactUserId: registeredUser.firebaseId,
+            userId: user.id,
+            contactUserId: registeredUser.id,
             displayName: contact.displayName,
             phonenumber: contact.phonenumber,
           },
@@ -77,7 +95,7 @@ export class ContactsService {
 
     const contactList = await this.db.contacts.findMany({
       where: {
-        userId: uid,
+        userId: user.id,
       },
       include: {
         contactUser: {

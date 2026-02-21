@@ -27,12 +27,21 @@ export class AuthService {
         throw new BadRequestException('Invalid Firebase token');
       }
 
-      const existingUser = await this.db.user.findUnique({
-        where: { firebaseId: uid },
+      const existinguser = await this.db.user.findFirst({
+        where: { OR: [{ phoneNumber: phone_number }, { firebaseId: uid }] },
+        select: {
+          id: true,
+          name: true,
+          about: true,
+          profileImage: true,
+          hasCompletedSetup: true,
+          firebaseId: true,
+          phoneNumber: true,
+        },
       });
 
-      if (existingUser) {
-        throw new BadRequestException('User already exists');
+      if (existinguser) {
+        return existinguser;
       }
 
       let photoUrl: UploadApiResponse | undefined = undefined;
@@ -123,6 +132,45 @@ export class AuthService {
         phoneNumber: true,
       },
     });
+
+    return user;
+  }
+
+  async checkUserOnboarding(id: string) {
+    const user = await this.db.user.findUnique({
+      where: {
+        firebaseId: id,
+      },
+      select: {
+        hasCompletedSetup: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('No user found');
+    }
+
+    return user.hasCompletedSetup;
+  }
+
+  async getUserById(id: string) {
+    const user = await this.db.user.findUnique({
+      where: {
+        firebaseId: id,
+      },
+      select: {
+        name: true,
+        about: true,
+        profileImage: true,
+        hasCompletedSetup: true,
+        firebaseId: true,
+        phoneNumber: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('No user found');
+    }
 
     return user;
   }

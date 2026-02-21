@@ -18,7 +18,7 @@ type FrontendUser = Pick<
 
 interface UserStore {
   user: FrontendUser | null;
-  setUser: (user: FrontendUser) => void;
+  setUser: (user: FrontendUser | null) => void;
   updateUser: (fields: Partial<FrontendUser>) => void;
   clearUser: () => void;
 }
@@ -41,8 +41,8 @@ export const useUserStore = create<UserStore>()(
         getItem: (name) => mmkv.getString(name) ?? null,
         removeItem: (name) => mmkv.delete(name),
       })),
-    }
-  )
+    },
+  ),
 );
 
 export const useUser = useUserStore;

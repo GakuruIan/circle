@@ -10,9 +10,9 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
-
 import "@/global.css";
+
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ReactQueryClientProvider } from "@/providers/ReactQueryProvider";
