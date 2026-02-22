@@ -251,4 +251,130 @@ export class ChatService {
       updatedAt: chat.lastMessageAt || chat.createdAt,
     };
   }
+
+  async CreateLabel(currentUserId: string, name: string) {
+    try {
+      if (!currentUserId) {
+        throw new BadRequestException('User Id is required');
+      }
+
+      if (!name) {
+        throw new BadRequestException('Label name is required');
+      }
+
+      const newLabel = await this.db.label.create({
+        data: {
+          name,
+          user: {
+            connect: {
+              id: currentUserId,
+            },
+          },
+        },
+      });
+
+      return newLabel;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async EditLabel(labelId: string, name: string) {
+    try {
+      if (!labelId) {
+        throw new BadRequestException('Label Id is required');
+      }
+
+      if (!name) {
+        throw new BadRequestException('Label name is required');
+      }
+
+      const updatedLabel = await this.db.label.update({
+        where: {
+          id: labelId,
+        },
+        data: {
+          name,
+        },
+      });
+
+      return updatedLabel;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async GetUserLabels(currentUserId: string) {
+    try {
+      if (!currentUserId) {
+        throw new BadRequestException('User Id is required');
+      }
+
+      const labels = await this.db.label.findMany({
+        where: {
+          userId: currentUserId,
+        },
+      });
+
+      return labels;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async AddChatToLabel(chatId: string, labelId: string) {
+    try {
+      if (!chatId || !labelId) {
+        throw new BadRequestException('Chat Id and Label Id are required');
+      }
+
+      const newChatLabel = await this.db.chatLabel.create({
+        data: {
+          chat: {
+            connect: {
+              id: chatId,
+            },
+          },
+          label: {
+            connect: {
+              id: labelId,
+            },
+          },
+        },
+      });
+
+      return newChatLabel;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async RemoveChatFromLabel(chatId: string, labelId: string) {
+    try {
+      if (!chatId || !labelId) {
+        throw new BadRequestException('Chat Id and Label Id are required');
+      }
+
+      const chatLabel = await this.db.chatLabel.findFirst({
+        where: {
+          chatId,
+          labelId,
+        },
+      });
+
+      if (!chatLabel) {
+        throw new BadRequestException('Chat Label not found');
+      }
+
+      await this.db.chatLabel.delete({
+        where: {
+          id: chatLabel.id,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -25,7 +25,7 @@ const ChatList = ({ chats }: props) => {
   const { height } = Dimensions.get("screen");
 
   return (
-    <View className="flex-1  pt-2">
+    <View className="flex-1   pt-2">
       <FlatList
         showsVerticalScrollIndicator={false}
         data={chats}

@@ -88,4 +88,137 @@ export class ChatController {
       res.status(500).send(error);
     }
   }
+
+  @Post('create-label')
+  @UseGuards(FirebaseGuardAuth)
+  async CreateLabel(
+    @Body() dto: { name: string },
+    @Res() res: Response,
+    @Req() req: Request & { user: admin.auth.DecodedIdToken },
+  ) {
+    try {
+      const { uid } = req.user;
+
+      const user = await this.db.user.findUnique({
+        where: {
+          firebaseId: uid,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const label = await this.chatservice.CreateLabel(user.id, dto.name);
+
+      return res.status(200).send(label);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(error);
+    }
+  }
+
+  @Get('labels')
+  @UseGuards(FirebaseGuardAuth)
+  async GetUserLabels(
+    @Res() res: Response,
+    @Req() req: Request & { user: admin.auth.DecodedIdToken },
+  ) {
+    try {
+      const { uid } = req.user;
+
+      const user = await this.db.user.findUnique({
+        where: {
+          firebaseId: uid,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const labels = await this.chatservice.GetUserLabels(user.id);
+
+      res.status(HttpStatus.OK).send(labels);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error);
+    }
+  }
+
+  @Post('add-chat-to-label')
+  @UseGuards(FirebaseGuardAuth)
+  async AddChatToLabel(
+    @Body() dto: { chatId: string; labelId: string },
+    @Res() res: Response,
+    @Req() req: Request & { user: admin.auth.DecodedIdToken },
+  ) {
+    try {
+      const { uid } = req.user;
+
+      const user = await this.db.user.findUnique({
+        where: {
+          firebaseId: uid,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const chatLabel = await this.chatservice.AddChatToLabel(
+        dto.chatId,
+        dto.labelId,
+      );
+
+      return res.status(200).send(chatLabel);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(error);
+    }
+  }
+
+  @Post('remove-chat-from-label')
+  @UseGuards(FirebaseGuardAuth)
+  async RemoveChatFromLabel(
+    @Body() dto: { chatId: string; labelId: string },
+    @Res() res: Response,
+    @Req() req: Request & { user: admin.auth.DecodedIdToken },
+  ) {
+    try {
+      const { uid } = req.user;
+
+      const user = await this.db.user.findUnique({
+        where: {
+          firebaseId: uid,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const chatLabel = await this.chatservice.RemoveChatFromLabel(
+        dto.chatId,
+        dto.labelId,
+      );
+
+      return res.status(200).send(chatLabel);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(error);
+    }
+  }
 }

@@ -57,6 +57,7 @@ model User {
   blockedByUsers BlockedUser[] @relation("BlockedUser")
 
   DeletedMessage DeletedMessage[]
+  labels         Label[]
 
   @@index([phoneNumber])
 }
@@ -100,6 +101,8 @@ model Chat {
   lastMessage   Message?  @relation("ChatLastMessage", fields: [lastMessageId], references: [id])
   lastMessageAt DateTime?
 
+  labels ChatLabel[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -121,6 +124,24 @@ model ChatParticipants {
   joinedAt DateTime @default(now())
 
   @@unique([userId, chatId])
+}
+
+model Label {
+  id     String      @id @unique @default(uuid())
+  name   String
+  user   User        @relation(fields: [userId], references: [id])
+  userId String
+  chats  ChatLabel[]
+}
+
+model ChatLabel {
+  id      String @id @unique @default(uuid())
+  chat    Chat   @relation(fields: [chatId], references: [id])
+  chatId  String
+  label   Label  @relation(fields: [labelId], references: [id])
+  labelId String
+
+  @@index([chatId, labelId])
 }
 
 model BlockedUser {

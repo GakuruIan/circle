@@ -22,6 +22,8 @@ module.exports = {
         },
         light: {
           100: "#F8FAFC",
+          200: "#F3F6FE",
+          300: "#EDF2F8",
         },
       },
       fontFamily: {

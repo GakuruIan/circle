@@ -77,3 +77,58 @@ export const FetchChatMessages = async ({
     throw new Error("An error occurred while fetching messages");
   }
 };
+
+export const FetchUserLabels = async () => {
+  try {
+    const res = await api.get("/chats/labels");
+    return res.data;
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Label Error:", err.message);
+      throw err;
+    }
+    throw new Error("An error occurred while fetching labels");
+  }
+};
+
+export const CreateLabel = async (name: string) => {
+  try {
+    const res = await api.post("/chats/create-label", { name });
+    return res.data;
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Label Error:", err.message);
+      throw err;
+    }
+    throw new Error("An error occurred while creating label");
+  }
+};
+
+export const AddChatToLabel = async (chatId: string, labelId: string) => {
+  try {
+    const res = await api.post("/chats/add-chat-to-label", { chatId, labelId });
+    return res.data;
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Label Error:", err.message);
+      throw err;
+    }
+    throw new Error("An error occurred while adding chat to label");
+  }
+};
+
+export const RemoveChatFromLabel = async (chatId: string, labelId: string) => {
+  try {
+    const res = await api.post("/chats/remove-chat-from-label", {
+      chatId,
+      labelId,
+    });
+    return res.data;
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Label Error:", err.message);
+      throw err;
+    }
+    throw new Error("An error occurred while removing chat from label");
+  }
+};
